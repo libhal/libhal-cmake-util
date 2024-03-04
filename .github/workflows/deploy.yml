@@ -17,10 +17,6 @@ name: 🚀 deploy
 on:
   workflow_dispatch:
   pull_request:
-  release:
-    types:
-      - published
-      - deleted
   push:
     branches:
       - main
@@ -28,7 +24,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-22.04
-    if: github.event.action != 'deleted'
     steps:
       - uses: actions/checkout@v2
         with:
@@ -61,28 +56,3 @@ jobs:
       - name: 🆙 Upload package to `libhal-trunk` repo
         if: startsWith(github.ref, 'refs/tags/')
         run: conan upload "libhal-cmake-util/*" --confirm -r=libhal-trunk
-
-  revoke:
-    runs-on: ubuntu-22.04
-    if: github.event.action == 'deleted'
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: true
-          fetch-depth: 0
-
-      - name: 📥 Install CMake & Conan
-        run: pip3 install cmake conan==2.0.9
-
-      - name: 📡 Add `libhal-trunk` conan remote
-        run: conan remote add libhal-trunk
-          https://libhal.jfrog.io/artifactory/api/conan/trunk-conan
-
-      - name: 📡 Sign into JFrog Artifactory
-        env:
-          API_KEY: ${{ secrets.JFROG_LIBHAL_TRUNK_API_KEY }}
-          JFROG_USER: ${{ secrets.JFROG_LIBHAL_TRUNK_USER }}
-        run: conan remote login -p $API_KEY libhal $JFROG_USER
-
-      - name: 🚮 Pulling package version ${{ github.ref_name }} from `libhal`
-        run: conan remove "libhal-cmake-util/${{ github.event.release.tag_name }}" --confirm -r=libhal
