@@ -93,7 +93,9 @@ function(libhal_make_library)
     -Werror
     -Wall
     -Wextra
-    -Wshadow)
+    -Wshadow
+    -fexceptions
+    -fno-rtti)
   target_link_libraries(${LIBRARY_ARGS_LIBRARY_NAME} PUBLIC
     ${LIBRARY_ARGS_LINK_LIBRARIES})
   install(TARGETS ${LIBRARY_ARGS_LIBRARY_NAME})
@@ -184,11 +186,18 @@ function(libhal_test_and_make_library)
   if(NOT ${CMAKE_CROSSCOMPILING})
     libhal_unit_test(
       SOURCES ${BUILD_ARGS_SOURCES} ${BUILD_ARGS_TEST_SOURCES}
+
       INCLUDES ${BUILD_ARGS_INCLUDES}
+
       PACKAGES
+      libhal # Provide for convience
+      libhal-util # Provide for convience
       ${BUILD_ARGS_PACKAGES}
       ${BUILD_ARGS_TEST_PACKAGES}
+
       LINK_LIBRARIES
+      libhal::libhal # Provide for convience
+      libhal::util # Provide for convience
       ${BUILD_ARGS_LINK_LIBRARIES}
       ${BUILD_ARGS_TEST_LINK_LIBRARIES}
     )
@@ -198,8 +207,8 @@ function(libhal_test_and_make_library)
     LIBRARY_NAME ${BUILD_ARGS_LIBRARY_NAME}
     SOURCES ${BUILD_ARGS_SOURCES}
     INCLUDES ${BUILD_ARGS_INCLUDES}
-    PACKAGES ${BUILD_ARGS_PACKAGES}
-    LINK_LIBRARIES ${BUILD_ARGS_LINK_LIBRARIES}
+    PACKAGES libhal libhal-util ${BUILD_ARGS_PACKAGES}
+    LINK_LIBRARIES libhal::libhal libhal::util ${BUILD_ARGS_LINK_LIBRARIES}
   )
 endfunction()
 
@@ -233,6 +242,7 @@ function(libhal_build_demos)
                  "libhal-$ENV{LIBHAL_PLATFORM}")
 
   find_package(libhal-$ENV{LIBHAL_PLATFORM_LIBRARY} REQUIRED)
+  find_package(prebuilt-picolibc REQUIRED)
 
   foreach(PACKAGE ${DEMO_ARGS_PACKAGES})
     find_package(${PACKAGE} REQUIRED)
@@ -255,8 +265,11 @@ function(libhal_build_demos)
     -Wall
     -Wextra
     -Wshadow
+    -fexceptions
+    -fno-rtti
   )
   target_link_libraries(startup_code PRIVATE
+    picolibc
     ${DEMO_ARGS_LINK_LIBRARIES}
     libhal::$ENV{LIBHAL_PLATFORM_LIBRARY}
   )
@@ -277,9 +290,12 @@ function(libhal_build_demos)
       -Wall
       -Wextra
       -Wshadow
+      -fexceptions
+      -fno-rtti
     )
     target_link_libraries(${elf} PRIVATE
       startup_code
+      picolibc
       ${DEMO_ARGS_LINK_LIBRARIES}
       libhal::$ENV{LIBHAL_PLATFORM_LIBRARY}
     )
