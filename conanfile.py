@@ -25,7 +25,6 @@ class libhal_cmake_util_conan(ConanFile):
     name = "libhal-cmake-util"
     version = "4.0.3"
     license = "Apache-2.0"
-    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libhal.github.io/libhal-armcortex"
     description = ("A collection of CMake scripts for ARM Cortex ")
     topics = ("cmake", "libhal", "embedded", "embedded-systems", "firmware")
@@ -92,3 +91,4 @@ class libhal_cmake_util_conan(ConanFile):
             f"add_build_outputs: {self.options.add_build_outputs}")
         self.output.info(
             f"optimize_debug_build: {self.options.optimize_debug_build}")
+
