@@ -18,6 +18,9 @@ include(CheckCXXCompilerFlag)
 # manger) puts it.
 set(LIBHAL_SCRIPT_PATH ${CMAKE_CURRENT_LIST_DIR})
 
+# Generate compile commands for anyone using our libraries.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Colored LIBHAL text
 set(LIBHAL_TITLE "${BoldMagenta}[LIBHAL]:${ColourReset}")
 
