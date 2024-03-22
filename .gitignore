@@ -1,11 +1,59 @@
-CMakeLists.txt.user
-CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Testing
-Makefile
-cmake_install.cmake
-install_manifest.txt
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# IDEs
+.vscode/
+archives/
+
+# GDB
+.gdb_history
+
+# Artifacts
+build/
+tools/
+
+# lint artifacts
 compile_commands.json
-CTestTestfile.cmake
-_deps
+
+# OS files
+.DS_Store
+
+# Conan Files
+graph_info.json
+conaninfo.txt
+conan.lock
+conanbuildinfo.txt
+
+# CMake
+CMakeUserPresets.json
+
