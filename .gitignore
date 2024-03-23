@@ -44,6 +44,7 @@ tools/
 
 # lint artifacts
 compile_commands.json
+.cache/
 
 # OS files
 .DS_Store
@@ -56,3 +57,4 @@ conanbuildinfo.txt
 
 # CMake
 CMakeUserPresets.json
+
