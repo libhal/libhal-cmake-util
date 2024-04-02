@@ -18,6 +18,11 @@ include(CheckCXXCompilerFlag)
 # manger) puts it.
 set(LIBHAL_SCRIPT_PATH ${CMAKE_CURRENT_LIST_DIR})
 
+# The CMake compiler test doesn't always work on all platforms so we should
+# just turn this off.
+set(CMAKE_C_COMPILER_WORKS 1)
+set(CMAKE_CXX_COMPILER_WORKS 1)
+
 # Generate compile commands for anyone using our libraries.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -78,7 +83,7 @@ function(libhal_make_library)
     include
     src
     ${LIBRARY_ARGS_INCLUDES})
-  target_compile_features(${LIBRARY_ARGS_LIBRARY_NAME} PRIVATE cxx_std_20)
+
   target_compile_options(${LIBRARY_ARGS_LIBRARY_NAME} PRIVATE
     -g
     -Werror
@@ -131,7 +136,7 @@ function(libhal_unit_test)
 
   target_include_directories(unit_test PUBLIC include tests src
     ${UNIT_TEST_ARGS_INCLUDES})
-  target_compile_features(unit_test PRIVATE cxx_std_20)
+
 
   target_compile_options(unit_test PRIVATE
     --coverage
@@ -248,7 +253,7 @@ function(libhal_build_demos)
 
   add_library(startup_code ${startup_source_files})
 
-  target_compile_features(startup_code PRIVATE cxx_std_20)
+
   target_include_directories(startup_code PUBLIC ${DEMO_ARGS_INCLUDES})
   target_compile_options(startup_code PRIVATE
     -g
@@ -273,7 +278,7 @@ function(libhal_build_demos)
     set(elf ${demo}.elf)
     message(STATUS "${LIBHAL_TITLE} Generating Demo for \"${elf}\"")
     add_executable(${elf} ${CMAKE_SOURCE_DIR}/applications/${demo}.cpp)
-    target_compile_features(${elf} PRIVATE cxx_std_20)
+
     target_include_directories(${elf} PUBLIC ${DEMO_ARGS_INCLUDES})
     target_compile_options(${elf} PRIVATE
       -g
