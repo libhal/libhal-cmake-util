@@ -36,29 +36,36 @@ add_custom_target(copy_compile_commands ALL
 # Colored LIBHAL text
 set(LIBHAL_TITLE "${BoldMagenta}[LIBHAL]:${ColourReset}")
 
-# Find clang-tidy-17
-find_program(LIBHAL_CLANG_TIDY_PROGRAM NAMES "clang-tidy-17" DOC
-  "Path to clang-tidy executable")
-
-if(NOT LIBHAL_CLANG_TIDY_PROGRAM)
-  message(STATUS "${LIBHAL_TITLE} clang-tidy not found.")
+if(WIN32)
+  # Disable clang-tidy for Windows builds
+  set(CMAKE_CXX_CLANG_TIDY "")
 else()
-  # Set clang-tidy as a CXX language standard option
-  message(STATUS "${LIBHAL_TITLE} clang-tidy-17 AVAILABLE!")
-  set(LIBHAL_CLANG_TIDY_CONFIG_FILE
-    "${LIBHAL_SCRIPT_PATH}/clang-tidy.conf")
-  set(LIBHAL_CLANG_TIDY "${LIBHAL_CLANG_TIDY_PROGRAM}"
-    "--config-file=${LIBHAL_CLANG_TIDY_CONFIG_FILE}")
+  # Find clang-tidy-17
+  find_program(LIBHAL_CLANG_TIDY_PROGRAM NAMES "clang-tidy-17" DOC
+    "Path to clang-tidy executable")
+
+  if(NOT LIBHAL_CLANG_TIDY_PROGRAM)
+    message(STATUS "${LIBHAL_TITLE} clang-tidy not found.")
+  else()
+    # Set clang-tidy as a CXX language standard option
+    message(STATUS "${LIBHAL_TITLE} clang-tidy-17 AVAILABLE!")
+    set(LIBHAL_CLANG_TIDY_CONFIG_FILE
+      "${LIBHAL_SCRIPT_PATH}/clang-tidy.conf")
+    set(LIBHAL_CLANG_TIDY "${LIBHAL_CLANG_TIDY_PROGRAM}"
+      "--config-file=${LIBHAL_CLANG_TIDY_CONFIG_FILE}")
+  endif()
 endif()
 
 # Adds clang tidy check to target for host builds (skipped if a cross build)
 function(_libhal_add_clang_tidy_check TARGET)
-  if(NOT ${CMAKE_CROSSCOMPILING})
-    set(CMAKE_CXX_CLANG_TIDY ${LIBHAL_CLANG_TIDY_PROGRAM})
-    set_target_properties(${TARGET} PROPERTIES CXX_CLANG_TIDY
-      "${LIBHAL_CLANG_TIDY}")
-  else()
+  if(${CMAKE_CROSSCOMPILING})
     message(STATUS "${LIBHAL_TITLE} Cross compiling, skipping clang-tidy checks for \"${TARGET}\"")
+  elseif(WIN32)
+    message(STATUS "${LIBHAL_TITLE} Windows has issues with clang-tidy, skipping clang-tidy checks for \"${TARGET}\"")
+  else()
+    set(CMAKE_CXX_CLANG_TIDY ${LIBHAL_CLANG_TIDY_PROGRAM})
+      set_target_properties(${TARGET} PROPERTIES CXX_CLANG_TIDY
+        "${LIBHAL_CLANG_TIDY}")
   endif()
 endfunction()
 
