@@ -155,7 +155,8 @@ function(libhal_unit_test)
     -Wshadow
     -Wnon-virtual-dtor
     -Wno-gnu-statement-expression
-    -pedantic)
+    -pedantic
+    -g)
 
   target_link_options(unit_test PRIVATE
     --coverage
