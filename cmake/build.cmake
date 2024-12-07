@@ -40,15 +40,16 @@ if(WIN32)
   # Disable clang-tidy for Windows builds
   set(CMAKE_CXX_CLANG_TIDY "")
 else()
-  # Find clang-tidy-17
-  find_program(LIBHAL_CLANG_TIDY_PROGRAM NAMES "clang-tidy-17" DOC
-    "Path to clang-tidy executable")
+  # Find clang-tidy "clang-tidy"
+  find_program(LIBHAL_CLANG_TIDY_PROGRAM
+    NAMES "clang-tidy" "clang-tidy-17" "clang-tidy-18"
+    DOC "Path to clang-tidy executable")
 
   if(NOT LIBHAL_CLANG_TIDY_PROGRAM)
     message(STATUS "${LIBHAL_TITLE} clang-tidy not found.")
   else()
     # Set clang-tidy as a CXX language standard option
-    message(STATUS "${LIBHAL_TITLE} clang-tidy-17 AVAILABLE!")
+    message(STATUS "${LIBHAL_TITLE} clang-tidy AVAILABLE!")
     set(LIBHAL_CLANG_TIDY_CONFIG_FILE
       "${LIBHAL_SCRIPT_PATH}/clang-tidy.conf")
     set(LIBHAL_CLANG_TIDY "${LIBHAL_CLANG_TIDY_PROGRAM}"
@@ -97,8 +98,7 @@ function(libhal_make_library)
     -Wall
     -Wextra
     -Wshadow
-    -fexceptions
-    -fno-rtti)
+    $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -fno-rtti>)
   target_link_libraries(${LIBRARY_ARGS_LIBRARY_NAME} PUBLIC
     ${LIBRARY_ARGS_LINK_LIBRARIES})
   install(TARGETS ${LIBRARY_ARGS_LIBRARY_NAME})
@@ -269,8 +269,7 @@ function(libhal_build_demos)
     -Wall
     -Wextra
     -Wshadow
-    -fexceptions
-    -fno-rtti
+    $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -fno-rtti>
   )
   target_link_libraries(startup_code PRIVATE
     picolibc
@@ -294,8 +293,7 @@ function(libhal_build_demos)
       -Wall
       -Wextra
       -Wshadow
-      -fexceptions
-      -fno-rtti
+      $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -fno-rtti>
     )
     target_link_libraries(${elf} PRIVATE
       startup_code
