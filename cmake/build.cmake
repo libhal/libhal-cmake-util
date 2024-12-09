@@ -49,7 +49,7 @@ else()
     message(STATUS "${LIBHAL_TITLE} clang-tidy not found.")
   else()
     # Set clang-tidy as a CXX language standard option
-    message(STATUS "${LIBHAL_TITLE} clang-tidy AVAILABLE!")
+    message(STATUS "${LIBHAL_TITLE} ${LIBHAL_CLANG_TIDY_PROGRAM} AVAILABLE!")
     set(LIBHAL_CLANG_TIDY_CONFIG_FILE
       "${LIBHAL_SCRIPT_PATH}/clang-tidy.conf")
     set(LIBHAL_CLANG_TIDY "${LIBHAL_CLANG_TIDY_PROGRAM}"
