@@ -134,7 +134,7 @@ function(libhal_unit_test)
   if(${ADDRESS_SANITIZER_SUPPORT})
     message(STATUS "${LIBHAL_TITLE} Address Sanitizer available! Using it for tests!")
     target_compile_options(unit_test PRIVATE -fsanitize=address)
-    target_link_options(unit_test PRIVATE -fsanitize=address)
+    target_link_options(unit_test PRIVATE -fsanitize=address -shared-libsan)
   else()
     message(STATUS "${LIBHAL_TITLE} Address Sanitizer not supported!")
   endif(${ADDRESS_SANITIZER_SUPPORT})
@@ -143,7 +143,6 @@ function(libhal_unit_test)
 
   target_include_directories(unit_test PUBLIC include tests src
     ${UNIT_TEST_ARGS_INCLUDES})
-
 
   target_compile_options(unit_test PRIVATE
     --coverage
