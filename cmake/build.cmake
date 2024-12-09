@@ -42,7 +42,7 @@ if(WIN32)
 else()
   # Find clang-tidy "clang-tidy"
   find_program(LIBHAL_CLANG_TIDY_PROGRAM
-    NAMES "clang-tidy" "clang-tidy-17" "clang-tidy-18"
+    NAMES "clang-tidy-18" "clang-tidy-17" "clang-tidy"
     DOC "Path to clang-tidy executable")
 
   if(NOT LIBHAL_CLANG_TIDY_PROGRAM)
