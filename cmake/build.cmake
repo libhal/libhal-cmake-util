@@ -98,6 +98,8 @@ function(libhal_make_library)
     -Wall
     -Wextra
     -Wshadow
+    -ffunction-sections
+    -fdata-sections
     $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -fno-rtti>)
   target_link_libraries(${LIBRARY_ARGS_LIBRARY_NAME} PUBLIC
     ${LIBRARY_ARGS_LINK_LIBRARIES})
@@ -153,6 +155,8 @@ function(libhal_unit_test)
     -Wextra
     -Wshadow
     -Wnon-virtual-dtor
+    -ffunction-sections
+    -fdata-sections
     -Wno-gnu-statement-expression
     -pedantic
     -g)
@@ -268,6 +272,8 @@ function(libhal_build_demos)
     -Wall
     -Wextra
     -Wshadow
+    -ffunction-sections
+    -fdata-sections
     $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -fno-rtti>
   )
   target_link_libraries(startup_code PRIVATE
@@ -292,6 +298,8 @@ function(libhal_build_demos)
       -Wall
       -Wextra
       -Wshadow
+      -ffunction-sections
+      -fdata-sections
       $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -fno-rtti>
     )
     target_link_libraries(${elf} PRIVATE
