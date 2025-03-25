@@ -100,6 +100,8 @@ function(libhal_make_library)
     -Wshadow
     -ffunction-sections
     -fdata-sections
+    -flto
+    -ffat-lto-objects
     $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -fno-rtti>)
   target_link_libraries(${LIBRARY_ARGS_LIBRARY_NAME} PUBLIC
     ${LIBRARY_ARGS_LINK_LIBRARIES})
@@ -274,6 +276,8 @@ function(libhal_build_demos)
     -Wshadow
     -ffunction-sections
     -fdata-sections
+    -flto
+    -ffat-lto-objects
     $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -fno-rtti>
   )
   target_link_libraries(startup_code PRIVATE
@@ -300,8 +304,11 @@ function(libhal_build_demos)
       -Wshadow
       -ffunction-sections
       -fdata-sections
+      -flto
+      -ffat-lto-objects
       $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -fno-rtti>
     )
+
     target_link_libraries(${elf} PRIVATE
       startup_code
       picolibc
