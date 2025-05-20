@@ -251,7 +251,7 @@ function(libhal_build_demos)
                  "libhal-$ENV{LIBHAL_PLATFORM}")
 
   find_package(libhal-$ENV{LIBHAL_PLATFORM_LIBRARY} REQUIRED)
-  find_package(prebuilt-picolibc REQUIRED)
+  find_package(prebuilt-picolibc QUIET)
 
   foreach(PACKAGE ${DEMO_ARGS_PACKAGES})
     find_package(${PACKAGE} REQUIRED)
@@ -265,7 +265,6 @@ function(libhal_build_demos)
   endif()
 
   add_library(startup_code ${startup_source_files})
-
 
   target_include_directories(startup_code PUBLIC ${DEMO_ARGS_INCLUDES})
   target_compile_options(startup_code PRIVATE
@@ -281,10 +280,14 @@ function(libhal_build_demos)
     $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -fno-rtti>
   )
   target_link_libraries(startup_code PRIVATE
-    picolibc
     ${DEMO_ARGS_LINK_LIBRARIES}
     libhal::$ENV{LIBHAL_PLATFORM_LIBRARY}
   )
+
+  if(prebuilt-picolibc_FOUND)
+      target_link_libraries(startup_code PRIVATE picolibc)
+      message(STATUS "${LIBHAL_TITLE} Found picolibc, linking it in!")
+  endif()
 
   if(NOT ${DEMO_ARGS_DISABLE_CLANG_TIDY})
     _libhal_add_clang_tidy_check(startup_code)
@@ -311,10 +314,13 @@ function(libhal_build_demos)
 
     target_link_libraries(${elf} PRIVATE
       startup_code
-      picolibc
       ${DEMO_ARGS_LINK_LIBRARIES}
       libhal::$ENV{LIBHAL_PLATFORM_LIBRARY}
     )
+
+    if(prebuilt-picolibc_FOUND)
+      target_link_libraries(${elf} PRIVATE picolibc)
+    endif()
 
     if(${CMAKE_CROSSCOMPILING})
       target_link_options(${elf} PRIVATE ${DEMO_ARGS_LINK_FLAGS})
