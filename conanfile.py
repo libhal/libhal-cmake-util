@@ -23,7 +23,7 @@ required_conan_version = ">=2.0.6"
 
 class libhal_cmake_util_conan(ConanFile):
     name = "libhal-cmake-util"
-    version = "4.1.8"
+    version = "4.1.9"
     license = "Apache-2.0"
     homepage = "https://libhal.github.io/libhal-armcortex"
     description = ("A collection of CMake scripts for ARM Cortex ")
