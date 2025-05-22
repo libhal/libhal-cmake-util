@@ -52,7 +52,6 @@ function(libhal_make_library)
   endforeach()
 
   add_library(${LIBRARY_ARGS_LIBRARY_NAME} ${LIBRARY_ARGS_SOURCES})
-  _libhal_add_clang_tidy_check(${LIBRARY_ARGS_LIBRARY_NAME})
   target_include_directories(${LIBRARY_ARGS_LIBRARY_NAME} PUBLIC
     include
     src
@@ -108,8 +107,6 @@ function(libhal_unit_test)
   else()
     message(STATUS "${LIBHAL_TITLE} Address Sanitizer not supported!")
   endif(${ADDRESS_SANITIZER_SUPPORT})
-
-  _libhal_add_clang_tidy_check(unit_test)
 
   target_include_directories(unit_test PUBLIC include tests src
     ${UNIT_TEST_ARGS_INCLUDES})
@@ -189,7 +186,7 @@ endfunction()
 
 function(libhal_build_demos)
   # Parse CMake function arguments
-  set(options DISABLE_CLANG_TIDY)
+  set(options)
   set(one_value_args)
   set(multi_value_args
     DEMOS
@@ -257,10 +254,6 @@ function(libhal_build_demos)
       message(STATUS "${LIBHAL_TITLE} Found picolibc, linking it in!")
   endif()
 
-  if(NOT ${DEMO_ARGS_DISABLE_CLANG_TIDY})
-    _libhal_add_clang_tidy_check(startup_code)
-  endif()
-
   foreach(demo ${DEMO_ARGS_DEMOS})
     set(elf ${demo}.elf)
     message(STATUS "${LIBHAL_TITLE} Generating Demo for \"${elf}\"")
@@ -297,10 +290,6 @@ function(libhal_build_demos)
       # devices.
       libhal_post_build(${elf})
       libhal_disassemble(${elf})
-    endif()
-
-    if(NOT ${DEMO_ARGS_DISABLE_CLANG_TIDY})
-      _libhal_add_clang_tidy_check(${elf})
     endif()
   endforeach()
 endfunction()
