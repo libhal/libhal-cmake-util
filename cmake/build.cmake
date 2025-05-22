@@ -231,7 +231,8 @@ function(libhal_build_demos)
     INCLUDES
     PACKAGES
     LINK_LIBRARIES
-    LINK_FLAGS)
+    LINK_FLAGS
+    COMPILE_FLAGS)
   cmake_parse_arguments(DEMO_ARGS
     "${options}"
     "${one_value_args}"
@@ -277,6 +278,7 @@ function(libhal_build_demos)
     -fdata-sections
     -flto
     -ffat-lto-objects
+    ${DEMO_ARGS_COMPILE_FLAGS}
     $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -fno-rtti>
   )
   target_link_libraries(startup_code PRIVATE
@@ -309,6 +311,7 @@ function(libhal_build_demos)
       -fdata-sections
       -flto
       -ffat-lto-objects
+      ${DEMO_ARGS_COMPILE_FLAGS}
       $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -fno-rtti>
     )
 

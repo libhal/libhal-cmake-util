@@ -34,7 +34,7 @@ jobs:
           fetch-depth: 0
 
       - name: 📥 Install CMake & Conan
-        run: pip3 install cmake conan==2.2.2
+        run: pipx install cmake conan==2.16.1
 
       - name: 📡 Add `libhal` conan remote
         run: conan remote add libhal
