@@ -66,7 +66,6 @@ function(libhal_make_library)
     -ffunction-sections
     -fdata-sections
     -flto
-    -ffat-lto-objects
     $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -fno-rtti>)
   target_link_libraries(${LIBRARY_ARGS_LIBRARY_NAME} PUBLIC
     ${LIBRARY_ARGS_LINK_LIBRARIES})
@@ -240,7 +239,6 @@ function(libhal_build_demos)
     -ffunction-sections
     -fdata-sections
     -flto
-    -ffat-lto-objects
     ${DEMO_ARGS_COMPILE_FLAGS}
     $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -fno-rtti>
   )
@@ -269,7 +267,6 @@ function(libhal_build_demos)
       -ffunction-sections
       -fdata-sections
       -flto
-      -ffat-lto-objects
       ${DEMO_ARGS_COMPILE_FLAGS}
       $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -fno-rtti>
     )
