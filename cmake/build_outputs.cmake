@@ -1,4 +1,4 @@
-# Copyright 2024 Khalil Estell
+# Copyright 2024 - 2025 Khalil Estell and the libhal contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,9 +36,14 @@ function(libhal_disassemble elf_file)
 
   # Create disassembly file
   add_custom_command(TARGET ${elf_file} POST_BUILD
-    COMMAND ${OBJDUMP} --disassemble --demangle
+    COMMAND ${OBJDUMP} -d -s
     ${CMAKE_CURRENT_BINARY_DIR}/${elf_file} >
     ${CMAKE_CURRENT_BINARY_DIR}/${elf_file}.S)
+  # Create disassembly file (demangled)
+  add_custom_command(TARGET ${elf_file} POST_BUILD
+    COMMAND ${OBJDUMP} -d -s --demangle
+    ${CMAKE_CURRENT_BINARY_DIR}/${elf_file} >
+    ${CMAKE_CURRENT_BINARY_DIR}/${elf_file}.demangled.S)
 endfunction()
 
 function(libhal_disassemble_with_source elf_file)

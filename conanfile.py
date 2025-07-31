@@ -1,4 +1,4 @@
-# Copyright 2024 Khalil Estell
+# Copyright 2024 - 2025 Khalil Estell and the libhal contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ required_conan_version = ">=2.0.6"
 
 class libhal_cmake_util_conan(ConanFile):
     name = "libhal-cmake-util"
-    version = "4.3.3"
+    version = "4.4.0"
     license = "Apache-2.0"
     homepage = "https://libhal.github.io/libhal-armcortex"
     description = ("A collection of CMake scripts for ARM Cortex ")
