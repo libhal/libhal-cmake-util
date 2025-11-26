@@ -98,7 +98,7 @@ function(libhal_unit_test)
 
   # Enable ASAN only on non-Windows platforms
   # (Windows ASAN requires runtime DLL setup)
-  if(${ADDRESS_SANITIZER_SUPPORT} and NOT WIN32)
+  if(${ADDRESS_SANITIZER_SUPPORT} AND NOT WIN32)
     message(STATUS
     "${LIBHAL_TITLE} Address Sanitizer available! Using it for tests!")
     target_compile_options(unit_test PRIVATE -fsanitize=address)
@@ -106,7 +106,7 @@ function(libhal_unit_test)
   else()
     message(STATUS
     "${LIBHAL_TITLE} Address Sanitizer not supported or disabled on Windows!")
-  endif(${ADDRESS_SANITIZER_SUPPORT} and NOT WIN32)
+  endif(${ADDRESS_SANITIZER_SUPPORT} AND NOT WIN32)
 
   target_include_directories(unit_test PUBLIC include tests src
     ${UNIT_TEST_ARGS_INCLUDES})

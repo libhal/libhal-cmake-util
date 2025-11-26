@@ -46,8 +46,8 @@ jobs:
       - name: 👁️‍🗨️ Show conan profile
         run: conan profile show
 
-      - name: 📦 Create Conan Package
-        run: conan create .
+      - name: 📦 Create Conan Package version '${{ github.ref_name }}'
+        run: conan create . --version=${{ github.ref_name }}
 
       - name: 📡 Sign into JFrog Artifactory
         if: startsWith(github.ref, 'refs/tags/')
