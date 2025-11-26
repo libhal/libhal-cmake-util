@@ -96,13 +96,17 @@ function(libhal_unit_test)
   check_cxx_compiler_flag(-fsanitize=address ADDRESS_SANITIZER_SUPPORT)
   endblock()
 
-  if(${ADDRESS_SANITIZER_SUPPORT})
-    message(STATUS "${LIBHAL_TITLE} Address Sanitizer available! Using it for tests!")
+  # Enable ASAN only on non-Windows platforms
+  # (Windows ASAN requires runtime DLL setup)
+  if(${ADDRESS_SANITIZER_SUPPORT} and NOT WIN32)
+    message(STATUS
+    "${LIBHAL_TITLE} Address Sanitizer available! Using it for tests!")
     target_compile_options(unit_test PRIVATE -fsanitize=address)
     target_link_options(unit_test PRIVATE -fsanitize=address)
   else()
-    message(STATUS "${LIBHAL_TITLE} Address Sanitizer not supported!")
-  endif(${ADDRESS_SANITIZER_SUPPORT})
+    message(STATUS
+    "${LIBHAL_TITLE} Address Sanitizer not supported or disabled on Windows!")
+  endif(${ADDRESS_SANITIZER_SUPPORT} and NOT WIN32)
 
   target_include_directories(unit_test PUBLIC include tests src
     ${UNIT_TEST_ARGS_INCLUDES})
