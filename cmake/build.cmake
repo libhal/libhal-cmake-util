@@ -27,11 +27,21 @@ set(CMAKE_CXX_COMPILER_WORKS 1)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Always run this custom target by making it depend on ALL
+# This target will always return success even if the copy cannot be performed.
+# Making this always succeed is important for cross compilation with header
+# only libraries. Those header only libraries only have sources in the form of
+# unit tests, but during cross compilation, we disable tests resulting in no
+# sources. Without sources the compile_commands.json is not generated and thus
+# cannot be copied.
+#
+# TODO(#40): Provide useful warning message here
 add_custom_target(copy_compile_commands ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${CMAKE_BINARY_DIR}/compile_commands.json
-    ${CMAKE_SOURCE_DIR}/compile_commands.json
-    DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json)
+        "${CMAKE_BINARY_DIR}/compile_commands.json"
+        "${CMAKE_SOURCE_DIR}/compile_commands.json"
+        || ${CMAKE_COMMAND} -E true
+    COMMENT "Copying compile_commands.json to source directory"
+)
 
 # Colored LIBHAL text
 set(LIBHAL_TITLE "${BoldMagenta}[LIBHAL]:${ColourReset}")
