@@ -45,7 +45,7 @@ class libhal_cmake_util_conan(ConanFile):
         basic_layout(self)
 
     def requirements(self):
-        self.tool_requires("cmake/[^3.10.0]")
+        self.tool_requires("cmake/[>3.10.0 <5.0.0]")
 
     def package(self):
         copy(self, "LICENSE", dst=os.path.join(
