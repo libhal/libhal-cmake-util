@@ -108,7 +108,7 @@ function(libhal_unit_test)
 
   # Enable ASAN only on non-Windows platforms
   # (Windows ASAN requires runtime DLL setup)
-  if(${ADDRESS_SANITIZER_SUPPORT} AND NOT WIN32)
+  if(ADDRESS_SANITIZER_SUPPORT AND NOT WIN32)
     message(STATUS
     "${LIBHAL_TITLE} Address Sanitizer available! Using it for tests!")
     target_compile_options(unit_test PRIVATE -fsanitize=address)
@@ -116,7 +116,7 @@ function(libhal_unit_test)
   else()
     message(STATUS
     "${LIBHAL_TITLE} Address Sanitizer not supported or disabled on Windows!")
-  endif(${ADDRESS_SANITIZER_SUPPORT} AND NOT WIN32)
+  endif()
 
   target_include_directories(unit_test PUBLIC include tests src
     ${UNIT_TEST_ARGS_INCLUDES})
@@ -163,7 +163,7 @@ function(libhal_test_and_make_library)
     "${multi_value_args}"
     ${ARGN})
 
-  if(NOT ${CMAKE_CROSSCOMPILING})
+  if(NOT CMAKE_CROSSCOMPILING)
     libhal_unit_test(
       SOURCES ${BUILD_ARGS_SOURCES} ${BUILD_ARGS_TEST_SOURCES}
 
@@ -284,7 +284,7 @@ function(libhal_build_demos)
       target_link_libraries(${elf} PRIVATE picolibc)
     endif()
 
-    if(${CMAKE_CROSSCOMPILING})
+    if(CMAKE_CROSSCOMPILING)
       target_link_options(${elf} PRIVATE ${DEMO_ARGS_LINK_FLAGS})
       # Convert elf into .bin, .hex and other formats needed for programming
       # devices.
