@@ -1,0 +1,94 @@
+# Copyright 2024 - 2025 Khalil Estell and the libhal contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cmake_minimum_required(VERSION 3.15)
+
+# CMake helpers from libhal-cmake-helpers
+# Source: https://github.com/libhal/libhal-cmake-helpers
+find_package(LibhalBuild REQUIRED)
+
+# From libhal-cmake-helpers
+libhal_project_init(libhal-actuator)
+
+# ==============================================================================
+# Library - Option 1: Use the monolithic convenience function
+# ==============================================================================
+
+# From libhal-cmake-helpers
+libhal_test_and_make_library(
+    LIBRARY_NAME libhal-actuator
+    
+    SOURCES
+        src/rc_servo.cpp
+        src/smart_servo/rmd/drc_v2.cpp
+        src/smart_servo/rmd/mc_x_v2.cpp
+    
+    TEST_SOURCES
+        tests/main.test.cpp
+        tests/rc_servo.test.cpp
+        tests/smart_servo/rmd/drc.test.cpp
+        tests/smart_servo/rmd/mc_x.test.cpp
+    
+    PACKAGES
+        libhal-mock
+    
+    LINK_LIBRARIES
+        libhal::mock
+)
+
+# ==============================================================================
+# OR Library - Option 2: Granular approach
+# ==============================================================================
+
+# From libhal-cmake-helpers
+# libhal_add_library(libhal-actuator
+#     SOURCES
+#         src/rc_servo.cpp
+#         src/smart_servo/rmd/drc_v2.cpp
+#         src/smart_servo/rmd/mc_x_v2.cpp
+# )
+# 
+# target_link_libraries(libhal-actuator PRIVATE libhal::compile_options)
+# 
+# libhal_install_library(libhal-actuator)
+# 
+# libhal_add_tests(libhal-actuator
+#     TEST_SOURCES
+#         tests/main.test.cpp
+#         tests/rc_servo.test.cpp
+#         tests/smart_servo/rmd/drc.test.cpp
+#         tests/smart_servo/rmd/mc_x.test.cpp
+#     PACKAGES libhal-mock
+#     LINK_LIBRARIES libhal::mock
+# )
+
+# ==============================================================================
+# OR Library - Option 3: Quick convenience
+# ==============================================================================
+
+# From libhal-cmake-helpers
+# libhal_quick_library(libhal-actuator
+#     SOURCES
+#         src/rc_servo.cpp
+#         src/smart_servo/rmd/drc_v2.cpp
+#         src/smart_servo/rmd/mc_x_v2.cpp
+# )
+# 
+# libhal_add_tests(libhal-actuator
+#     TEST_SOURCES
+#         tests/main.test.cpp
+#         tests/rc_servo.test.cpp
+#     PACKAGES libhal-mock
+#     LINK_LIBRARIES libhal::mock
+# )

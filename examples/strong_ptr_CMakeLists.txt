@@ -1,0 +1,66 @@
+# Copyright 2024 - 2025 Khalil Estell and the libhal contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cmake_minimum_required(VERSION 4.0)
+
+# CMake helpers from libhal-cmake-helpers
+# Source: https://github.com/libhal/libhal-cmake-helpers
+find_package(LibhalBuild REQUIRED)
+
+# Initialize project (handles clang-tidy, compile flags setup, etc.)
+# From libhal-cmake-helpers
+libhal_project_init(strong_ptr)
+
+# ==============================================================================
+# Library - Option 1: Granular approach (full control)
+# ==============================================================================
+
+# From libhal-cmake-helpers
+libhal_add_library(strong_ptr
+    MODULES modules/strong_ptr.cppm
+)
+
+# Opt-in to libhal compile options
+target_link_libraries(strong_ptr PRIVATE libhal::compile_options)
+
+# From libhal-cmake-helpers
+libhal_install_library(strong_ptr
+    NAMESPACE libhal
+)
+
+# ==============================================================================
+# OR Library - Option 2: Convenience wrapper (opinionated)
+# ==============================================================================
+
+# From libhal-cmake-helpers - combines the above into one call
+# libhal_quick_library(strong_ptr
+#     MODULES modules/strong_ptr.cppm
+#     NAMESPACE libhal
+# )
+
+# ==============================================================================
+# Unit Testing
+# ==============================================================================
+
+# From libhal-cmake-helpers
+libhal_add_tests(strong_ptr
+    TEST_NAMES
+        enable_from_this
+        strong_ptr
+        mixins
+        weak_ptr
+        optional_ptr
+        monotonic_allocator
+    UTIL_MODULE tests/util.cppm
+)
