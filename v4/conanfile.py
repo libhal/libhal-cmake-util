@@ -16,7 +16,6 @@ from conan import ConanFile
 from conan.tools.files import copy
 from conan.tools.layout import basic_layout
 import os
-from pathlib import Path
 
 
 required_conan_version = ">=2.0.6"
@@ -57,43 +56,39 @@ class libhal_cmake_util_conan(ConanFile):
              dst=self.package_folder)
 
     def package_info(self):
-        # ======================================================================
-        # DEPRECATED part of package_info
-        #
-        # NOTE: It is not advised to continue using these cmake scripts and
-        # their functions, it is recommended to use the `LibhalBuild` package
-        # instead.
-        # ======================================================================
-
         # Add toolchain.cmake to user_toolchain configuration info to be used
         # by CMakeToolchain generator
-        OLD_CMAKE = Path(self.package_folder) / "cmake" / "deprecated"
-        BUILD_OUTPUTS_PATH = OLD_CMAKE / "build_outputs.cmake"
-        OPTIMIZE_DEBUG_BUILD_PATH = OLD_CMAKE / "optimize_debug_build.cmake"
-        BUILD_PATH = OLD_CMAKE / "build.cmake"
-        COLORS_PATH = OLD_CMAKE / "colors.cmake"
-        CLANG_TIDY_CONFIG_PATH = OLD_CMAKE / "clang-tidy.conf"
+        build_outputs_path = os.path.join(
+            self.package_folder, "cmake/build_outputs.cmake")
+        optimize_debug_build_path = os.path.join(
+            self.package_folder, "cmake/optimize_debug_build.cmake")
+        build_path = os.path.join(
+            self.package_folder, "cmake/build.cmake")
+        colors_path = os.path.join(
+            self.package_folder, "cmake/colors.cmake")
+        clang_tidy_config_path = os.path.join(
+            self.package_folder, "cmake/clang-tidy.conf")
 
         if self.options.add_build_outputs:
             self.conf_info.append(
                 "tools.cmake.cmaketoolchain:user_toolchain",
-                str(BUILD_OUTPUTS_PATH))
+                build_outputs_path)
 
         if self.options.optimize_debug_build:
             self.conf_info.append(
                 "tools.cmake.cmaketoolchain:user_toolchain",
-                str(OPTIMIZE_DEBUG_BUILD_PATH))
+                optimize_debug_build_path)
 
         self.conf_info.append(
             "tools.cmake.cmaketoolchain:user_toolchain",
-            str(COLORS_PATH))
+            colors_path)
 
         self.conf_info.append(
             "tools.cmake.cmaketoolchain:user_toolchain",
-            str(BUILD_PATH))
+            build_path)
 
         self.output.info(
-            f"CLANG_TIDY_CONFIG_PATH: {CLANG_TIDY_CONFIG_PATH}")
+            f"clang_tidy_config_path: {clang_tidy_config_path}")
         self.output.info(
             f"add_build_outputs: {self.options.add_build_outputs}")
         self.output.info(

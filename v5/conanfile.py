@@ -15,44 +15,43 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.files import copy
+from pathlib import Path
 
 
 class LibhalCMakeHelpersConan(ConanFile):
-    name = "libhal-cmake-helpers"
-    version = "1.0.0"
+    name = "libhal-cmake-util"
     license = "Apache-2.0"
     author = "Khalil Estell and the libhal contributors"
     url = "https://github.com/libhal/libhal-cmake-helpers"
     description = "CMake helper functions and utilities for libhal projects"
     topics = ("cmake", "build-helpers", "libhal", "embedded")
-    
     settings = "os", "compiler", "build_type", "arch"
-    
     exports_sources = "cmake/*", "CMakeLists.txt", "LICENSE"
-    
+
     def layout(self):
         cmake_layout(self)
-    
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-    
+
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        
+
         # Also copy license
-        copy(self, "LICENSE", 
-             src=self.source_folder, 
+        copy(self, "LICENSE",
+             src=self.source_folder,
              dst=self.package_folder)
-    
+
     def package_info(self):
         # This is a build-time only package
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "LibhalBuild")
-        self.cpp_info.builddirs = ["lib/cmake/LibhalBuild"]
-    
+        BUILD_DIR = str(Path("lib") / "cmake" / "LibhalBuild")
+        self.cpp_info.builddirs = [BUILD_DIR]
+
     def package_id(self):
         # This is a header-only/build-tool package, no binary compatibility
         self.info.clear()

@@ -27,6 +27,7 @@ install(
         cmake/LibhalExecutable.cmake
         cmake/LibhalTesting.cmake
         cmake/LibhalClangTidy.cmake
+        cmake/LibhalBinUtils.cmake
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/cmake/LibhalBuild
 )
