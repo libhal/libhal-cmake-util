@@ -3,7 +3,7 @@
 CMake helper functions and utilities for libhal projects. Provides convenient
 functions for common patterns.
 
-> [NOTE]
+> [!NOTE]
 > **Using v4?** The v4 API (toolchain injection style) is deprecated. See
 > [v4/README.md](v4/README.md) for legacy documentation. Consider migrating
 > to v5 for explicit `find_package()` integration and C++20 module support.
