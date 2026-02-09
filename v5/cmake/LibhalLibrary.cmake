@@ -45,7 +45,7 @@ function(libhal_add_library TARGET_NAME)
     # Set C++23 standard for modules support
     target_compile_features(${TARGET_NAME} PUBLIC cxx_std_23)
 
-    message(STATUS "Created library: ${TARGET_NAME}")
+    message(STATUS "📦 Created library: ${TARGET_NAME}")
 endfunction()
 
 # Granular function: Install a library with CMake config
@@ -80,5 +80,5 @@ function(libhal_install_library TARGET_NAME)
         CXX_MODULES_DIRECTORY "cxx-modules"
     )
 
-    message(STATUS "Configured install for: ${TARGET_NAME} (namespace: ${ARG_NAMESPACE}::)")
+    message(STATUS "🎯 Configured install for: ${TARGET_NAME} (namespace: ${ARG_NAMESPACE}::)")
 endfunction()

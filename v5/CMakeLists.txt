@@ -34,6 +34,7 @@ install(
 
 # Create a version file
 include(CMakePackageConfigHelpers)
+
 write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/LibhalCMakeUtilConfigVersion.cmake"
     VERSION 1.0.0

@@ -37,14 +37,13 @@ class LibhalCMakeUtilConan(ConanFile):
         basic_layout(self)
 
     def package(self):
-        copy(self, "LICENSE",
-             dst=str(Path(self.package_folder) / "licenses"),
-             src=self.source_folder)
+        copy(self, "LICENSE", dst=self.package_folder, src=self.source_folder)
         copy(self, "cmake/*.cmake",
              src=self.source_folder,
              dst=self.package_folder)
 
     def package_info(self):
-        # Add cmake/ directory to builddirs so find_package(LibhalCMakeUtil) works
+        # Add cmake/ directory to builddirs so find_package(LibhalCMakeUtil)
+        # works
         cmake_dir = str(Path(self.package_folder) / "cmake")
         self.cpp_info.builddirs = [cmake_dir]

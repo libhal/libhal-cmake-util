@@ -33,7 +33,7 @@ set(LIBHAL_ASAN_FLAGS
 # Convenience function to apply flags without remembering variable names
 function(libhal_apply_compile_options TARGET_NAME)
     if(NOT TARGET ${TARGET_NAME})
-        message(FATAL_ERROR "Target '${TARGET_NAME}' does not exist")
+        message(FATAL_ERROR "❌ Target '${TARGET_NAME}' does not exist")
     endif()
 
     target_compile_options(${TARGET_NAME} PRIVATE ${LIBHAL_CXX_FLAGS})
@@ -42,14 +42,14 @@ endfunction()
 
 function(libhal_apply_asan TARGET_NAME)
     if(NOT TARGET ${TARGET_NAME})
-        message(FATAL_ERROR "Target '${TARGET_NAME}' does not exist")
+        message(FATAL_ERROR "❌ Target '${TARGET_NAME}' does not exist")
     endif()
 
     if(NOT WIN32)
         target_compile_options(${TARGET_NAME} PRIVATE ${LIBHAL_ASAN_FLAGS})
         target_link_options(${TARGET_NAME} PRIVATE ${LIBHAL_ASAN_FLAGS})
-        message(STATUS "Applied AddressSanitizer to ${TARGET_NAME}")
+        message(STATUS "🛡️ Applied AddressSanitizer to ${TARGET_NAME}")
     else()
-        message(STATUS "AddressSanitizer not supported on Windows - skipping for ${TARGET_NAME}")
+        message(STATUS "🔄 AddressSanitizer not supported on Windows - skipping for ${TARGET_NAME}")
     endif()
 endfunction()

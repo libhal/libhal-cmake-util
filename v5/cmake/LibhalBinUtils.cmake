@@ -31,7 +31,7 @@ function(libhal_create_hex_file_from TARGET_NAME)
 
     # Verify objcopy is available
     if(NOT CMAKE_OBJCOPY)
-        message(WARNING "objcopy not found - cannot generate hex file for ${TARGET_NAME}")
+        message(WARNING "‼️ objcopy not found - cannot generate hex file for ${TARGET_NAME}")
         return()
     endif()
 
@@ -73,7 +73,7 @@ function(libhal_create_binary_file_from TARGET_NAME)
 
     # Verify objcopy is available
     if(NOT CMAKE_OBJCOPY)
-        message(WARNING "objcopy not found - cannot generate binary file for ${TARGET_NAME}")
+        message(WARNING "‼️ objcopy not found - cannot generate binary file for ${TARGET_NAME}")
         return()
     endif()
 

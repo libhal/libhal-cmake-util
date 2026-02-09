@@ -16,46 +16,46 @@
 
 # Options for controlling clang-tidy
 option(LIBHAL_ENABLE_CLANG_TIDY "Enable clang-tidy checks" OFF)
-option(LIBHAL_CLANG_TIDY_FIX "Apply clang-tidy fixes automatically" OFF)
+option(LIBHAL_CLANG_TIDY_FIX "Apply clang-tidy fixes automatically. If enabled, automatically enables clang-tidy." OFF)
 
 # Internal function to set up clang-tidy
 # Called by libhal_project_init()
 function(libhal_setup_clang_tidy)
     if(CMAKE_CROSSCOMPILING)
-        message(STATUS "Cross-compiling, skipping clang-tidy")
+        message(STATUS "🔄 Cross-compiling, skipping clang-tidy")
         return()
     endif()
-    
+
     if(NOT LIBHAL_ENABLE_CLANG_TIDY AND NOT LIBHAL_CLANG_TIDY_FIX)
-        message(STATUS "Clang-tidy disabled (use -DLIBHAL_ENABLE_CLANG_TIDY=ON to enable)")
+        message(STATUS "⚠️ Clang-tidy disabled. Use -DLIBHAL_ENABLE_CLANG_TIDY=ON to enable) or try -o '*:enable_clang_tidy=True' on conan packages with that option")
         return()
     endif()
-    
+
     find_program(CLANG_TIDY_EXE NAMES clang-tidy)
-    
+
     if(NOT CLANG_TIDY_EXE)
-        message(STATUS "Clang-tidy not found - continuing without it")
+        message(STATUS "❌ Clang-tidy not found - continuing without it")
         return()
     endif()
-    
-    message(STATUS "Clang-tidy found: ${CLANG_TIDY_EXE}")
-    
+
+    message(STATUS "✅ Clang-tidy found: ${CLANG_TIDY_EXE}")
+
     # Build the clang-tidy command
     set(CLANG_TIDY_CMD "${CLANG_TIDY_EXE}")
-    
+
     # Look for .clang-tidy file
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.clang-tidy")
         list(APPEND CLANG_TIDY_CMD "--config-file=${CMAKE_CURRENT_SOURCE_DIR}/.clang-tidy")
     endif()
-    
+
     # Add --fix if requested
     if(LIBHAL_CLANG_TIDY_FIX)
         list(APPEND CLANG_TIDY_CMD "--fix")
-        message(STATUS "Clang-tidy will apply fixes automatically")
+        message(STATUS "🛠️ Clang-tidy will apply fixes automatically")
     endif()
-    
+
     # Set the CMake variable to enable clang-tidy for all targets
-    set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_CMD} PARENT_SCOPE)
-    
-    message(STATUS "Clang-tidy enabled")
+    set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_CMD} CACHE STRING "clang-tidy command" FORCE)
+
+    message(STATUS "✅ Clang-tidy enabled!")
 endfunction()
