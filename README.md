@@ -1,269 +1,409 @@
 # libhal-cmake-util
 
-Generic cmake utilities such as macros, functions, and toolchains for all
-categories of libhal libraries.
+CMake helper functions and utilities for libhal projects. Provides both granular building blocks and convenient wrapper functions for common patterns.
 
-This package is a REQUIREMENT for libhal libraries using cmake.
+> [NOTE]
+> **Using v4?** The v4 API (toolchain injection style) is deprecated. See
+> [v4/README.md](v4/README.md) for legacy documentation. Consider migrating
+> to v5 for explicit `find_package()` integration and C++20 module support.
 
-## Integration into Conan
+## Installation
 
-Add the following line to the `build_requirements()` method of your library or
-applications `conanfile.py`:
-
-```python
-def build_requirements(self):
-  self.tool_requires("libhal-cmake-util/2.2.0")
-```
-
-**NOTE**: the `tool_requires` line can also go in the `requirements()` method or
-in the `tool_requires` attribute, but the standard way of doing this is in
-libhal is a `build_requirements()` method.
-
-## Package Options
-
-This package comes with some options to customize its behavior. You can set
-these options in the `tool_requires` function.
+Via Conan:
 
 ```python
 def build_requirements(self):
-  self.tool_requires("libhal-cmake-util/2.2.0",
-      options={
-        "add_build_outputs": True,
-        "optimize_debug_build": True,
-      })
+    self.tool_requires("libhal-cmake-util/[^5.0.0]")
 ```
 
-### Option: `add_build_outputs` (Default: `True`)
-
-When the `add_build_outputs` option is set to `True`, a range of post-build
-utility functions are made available. These functions generate additional files
-and information derived from the final binary or .elf file. These functions are
-provided to your CMake build project via the Conan CMake toolchain file. If
-you are using `conan build` along with the `CMakeToolchain` generator, then
-these functions will be made available in your `CMakeLists.txt` build script.
-
-- `libhal_generate_intel_hex(elf_file)`: transforms the provided elf file into
-  an Intel HEX (.hex) file.
-
-- `libhal_generate_binary(elf_file)`: turns the provided elf file into a binary
-  (.bin) file, a format often used for device flashing.
-
-- `libhal_disassemble(elf_file)`: breaks down the elf file into assembly code,
-- providing a platform for detailed analysis.
-
-- `libhal_disassemble_with_source(elf_file)`:  like the one above, disassembles
-  the elf file into assembly code for in-depth analysis. However, it also
-  integrates the source code with the disassembly, facilitating the mapping of
-  lines of code to the corresponding assembly instructions.
-
-- `libhal_print_size_info(elf_file)`: prints out the size
-  information for the different sections of the elf file.
-
-- `libhal_full_post_build(elf_file)`: executes a comprehensive post-build
-  process, which includes the following functions:
-  - `libhal_generate_intel_hex()`
-  - `libhal_generate_binary()`
-  - `libhal_disassemble()`
-  - `libhal_disassemble_with_source()`
-  - `libhal_print_size_info()`
-
-- `libhal_post_build(elf_file)`: performs a selective post-build process,
-  executing the following functions:
-  - `libhal_generate_intel_hex()`
-  - `libhal_generate_binary()`
-  - `libhal_print_size_info()`
-
-### Option: `optimize_debug_build` (Default: `True`)
-
-Setting `optimize_debug_build` to `True` modifies the `Debug` build type
-optimization level from `-O0 -g` to `-Og -g`. The `-Og` option offers a balance
-similar to `-O1`, but with modifications designed to enhance the debugging
-experience. However, these changes can increase the binary size compared to
-`-O1`.
-
-This option is particularly crucial because the `-O0` setting (no optimization)
-often leads to large binary sizes. These oversized binaries may not fit on a
-device when a more robust debugging experience is required.
-
-Why does this matter? At higher optimization levels, much of the source code can
-be optimized away, making step-through debugging appear erratic. You might
-experience skipped lines of code, inlined constructors that are difficult to
-interpret, and ephemeral stack variables that may disappear between lines of the
-same scope due to optimization. These factors can significantly complicate
-on-chip debugging.
-
-**NOTE**: this field is **REQUIRED** by all open source libhal libraries in
-order to reduce their library's binary size in debug mode.
-
-## Build functions
-
-This package automatically injects libhal cmake utility functions:
-
-### `libhal_test_and_make_library()`
-
-Builds and tests a library. This function must be used in place of using
-`libhal_unit_test` and `libhal_make_library` separately.
+## Quick Start
 
 ```cmake
-libhal_test_and_make_library([LIBRARY_NAME <library_name>]
-                             [SOURCES <files...>]
-                             [INCLUDES <directories...>]
-                             [PACKAGES <packages...>]
-                             [LINK_LIBRARIES <link_libraries...>])
+cmake_minimum_required(VERSION 4.0)
+
+# Find the helpers package
+find_package(LibhalCMakeUtil REQUIRED)
+
+# Initialize your project (required)
+libhal_project_init(my_library)
+
+# Option 1: Use convenience wrapper
+libhal_quick_library(my_library
+    SOURCES src/foo.cpp src/bar.cpp
+    MODULES modules/baz.cppm
+    NAMESPACE libhal
+)
+
+# Option 2: Granular control
+libhal_add_library(my_library
+    SOURCES src/foo.cpp
+    MODULES modules/bar.cppm
+)
+target_link_libraries(my_library PRIVATE libhal::compile_options)
+libhal_install_library(my_library NAMESPACE libhal)
+
+# Add tests
+libhal_add_tests(my_library
+    TEST_NAMES foo bar baz
+    MODULE tests/util.cppm
+)
 ```
 
-- `LIBRARY_NAME` name of the library (e.g. libhal-lpc40, libhal-util)
-- `SOURCES` is a list of source files to include in the package build and unit
-  tests.
-- `TEST_SOURCES` is a list of source unit test source files used to build the
-  unit test executable. This will not be included in the library package build.
-- `INCLUDES` is a list of include directories for the build process. Note that
-  the `include` and `src` directories are already included for you.
-- `PACKAGES` list of packages to automatically find and make available for the
-  package build.
-- `LINK_LIBRARIES` list of the libraries to link into the library.
-- `TEST_PACKAGES` list of test packages to automatically find and make available
-  for the package build.
-- `TEST_LINK_LIBRARIES` list of the libraries to link into the unit tests. These
-  libraries will be added to the library target.
+## Core Functions
 
-This function requires that Boost.UT unit testing framework to be available
-as a package. In conan, add this to your `build_requirements()` method:
+### `libhal_project_init(PROJECT_NAME)`
 
-```python
-def build_requirements(self):
-    self.tool_requires("libhal-cmake-util/2.2.0")
-    self.test_requires("boost-ext-ut/1.1.9")
-```
+**Required** - Sets up project-level configuration. This is the only mandatory function.
 
-### `libhal_unit_test()`
+What it does:
 
-Builds and executes unit tests for libhal. Use this for header only libraries
-that do not generate library files, but do have build-able unit tests. If
-non-test source files are present, then the libhal package MUST use the
-`libhal_test_and_make_library()` function.
+- Calls `project()` with C++ language
+- Enables compile_commands.json export
+- Checks for Ninja/Visual Studio generator (required for modules)
+- Sets up clang-tidy if enabled
+- Creates `libhal::compile_options` and `libhal::asan` interface targets
+- Adds compile_commands.json copy target
 
 ```cmake
-libhal_unit_test([SOURCES <files...>]
-                 [INCLUDES <directories...>]
-                 [PACKAGES <packages...>]
-                 [LINK_LIBRARIES <link_libraries...>])
+libhal_project_init(my_project)
 ```
 
-- `SOURCES` is a list of source files to include in the build for the unit
-  test. The set of source files MUST include the project source files as
-  well as the unit test source files.
-- `INCLUDES` is a list of include directires to be added to the executable.
-  Note that the `include`, `src`, and `test` directories are already
-  included for you.
-- `PACKAGES` list of packages to automatically find and make available for the
-  unit test build. Packages needed by the package binary will also be needed
-  for unit tests, so supply them here.
-- `LINK_LIBRARIES` list of the libraries to link into the unit test library.
-  Packages needed by the package binary will also be needed for unit tests,
-  so supply them here. DO NOT include the package/library that is being
-  tested here. This can cause linker errors because the same definition of
-  symbols will appear twice due to the files being compiled again in the
-  SOURCES directory. Omitting the source files causing the linker error will
-  cause those source files to be skipped during coverage. Clang and GCC both
-  need to add instrumentation to the source files during compilation to
-  enable coverage and package libraries are built without this
-  instrumentation.
+### Interface Targets
 
-All libhal packages and projects must be compiled with this function to comply
-with the libhal standards. This function does the following:
+After `libhal_project_init()`, these targets are available:
 
-1. Creates an target/executable named "unit_test"
-2. Accepts SOURCES and INCLUDE directories and provides them to the target
-3. Enables Address Sanitizer if the compiler supports it and issues warning if
-   it does not.
-4. Applies clang-tidy checks to all files if the clang-tidy program is
-   available on the system (issues warning if it does not)
-5. Add flags to enable code coverage for the unit test executable
+#### `libhal::compile_options`
 
-This function requires that Boost.UT unit testing framework to be available
-as a package. In conan, add this to your `build_requirements()` method:
-
-```python
-  def build_requirements(self):
-      self.tool_requires("libhal-cmake-util/2.2.0")
-      self.test_requires("boost-ext-ut/1.1.9")
-```
-
-### `libhal_make_library()`
-
-Builds libhal libraries. Use this when unit tests are not available or necessary
-but a package must be built.
+Standard compile flags for libhal projects. **Opt-in** via linking:
 
 ```cmake
-libhal_make_library([LIBRARY_NAME <library_name>]
-                    [SOURCES <files...>]
-                    [INCLUDES <directories...>]
-                    [PACKAGES <packages...>]
-                    [LINK_LIBRARIES <link_libraries...>])
+target_link_libraries(my_lib PRIVATE libhal::compile_options)
 ```
 
-- `LIBRARY_NAME` name of the library (e.g. libhal-lpc40, libhal-util)
-- `SOURCES` is a list of source files to include in the package build.
-- `INCLUDES` is a list of include directories to be added to the executable.
-  Note that the `include` and `src` directories are already included for you.
-- `PACKAGES` list of packages to automatically find and make available for the
-  package build.
-- `LINK_LIBRARIES` list of the libraries to link into the library.
-- `USE_CLANG_TIDY` use this option to enable clang tidy checks for libraries.
+Flags included:
+
+- GCC/Clang: `-g -Werror -Wall -Wextra -Wshadow -Wpedantic -fexceptions -fno-rtti`
+- MSVC: `/W4 /WX /EHsc /permissive- /GR-`
+
+#### `libhal::asan`
+
+AddressSanitizer support (non-Windows only):
+
+```cmake
+target_link_libraries(my_lib PRIVATE libhal::asan)
+```
+
+## Library Functions
+
+### Granular Functions
+
+#### `libhal_add_library(TARGET_NAME)`
+
+Creates a static library with optional sources and modules.
+
+```cmake
+libhal_add_library(my_lib
+    SOURCES src/foo.cpp src/bar.cpp
+    MODULES modules/baz.cppm modules/qux.cppm
+)
+```
+
+Arguments:
+
+- `SOURCES` - List of .cpp files
+- `MODULES` - List of .cppm module files
+
+#### `libhal_install_library(TARGET_NAME)`
+
+Configures library installation with CMake config files.
+
+```cmake
+libhal_install_library(my_lib NAMESPACE libhal)
+```
+
+Arguments:
+
+- `NAMESPACE` (optional) - Namespace for exported target (default: library name)
+
+### Convenience Functions
+
+#### `libhal_quick_library(TARGET_NAME)`
+
+One-shot library creation, configuration, and installation.
+
+```cmake
+libhal_quick_library(strong_ptr
+    MODULES modules/strong_ptr.cppm
+    NAMESPACE libhal
+)
+```
+
+Automatically applies:
+
+- `libhal::compile_options`
+- `libhal::asan` (when not cross-compiling)
+- Installs with CMake config
+
+#### `libhal_test_and_make_library()`
+
+Monolithic function combining library and tests (legacy pattern).
+
+```cmake
+libhal_test_and_make_library(
+    LIBRARY_NAME libhal-actuator
+    SOURCES src/rc_servo.cpp src/drc_v2.cpp
+    TEST_SOURCES tests/rc_servo.test.cpp tests/drc.test.cpp
+    PACKAGES libhal-mock
+    LINK_LIBRARIES libhal::mock
+)
+```
+
+## Testing Functions
+
+### `libhal_add_tests(TARGET_NAME)`
+
+Adds unit tests for a library. Supports two modes:
+
+#### Mode 1: Explicit test file list**
+
+```cmake
+libhal_add_tests(my_lib
+    TEST_SOURCES tests/foo.test.cpp tests/bar.test.cpp
+    PACKAGES libhal-mock
+    LINK_LIBRARIES libhal::mock
+)
+```
+
+#### Mode 2: Generate filenames from names
+
+```cmake
+libhal_add_tests(my_lib
+    TEST_NAMES foo bar baz
+    MODULE tests/util.cppm
+)
+```
+
+Looks for `tests/foo.test.cpp`, `tests/bar.test.cpp`, etc.
+
+#### Arguments
+
+Arguments:
+
+- `TEST_SOURCES` - Explicit list of test files
+- `TEST_NAMES` - Generate test filenames (tests/NAME.test.cpp)
+- `MODULE` - Optional utility module for tests
+- `PACKAGES` - Additional packages to find
+- `LINK_LIBRARIES` - Additional libraries to link
+
+## Executable/Demo Functions
+
+### `libhal_add_executable(TARGET_NAME)`
+
+Creates a single executable/demo.
+
+```cmake
+libhal_add_executable(my_demo
+    SOURCES demos/my_demo.cpp src/common.cpp
+    INCLUDES include/
+    PACKAGES libhal-util libhal-lpc40
+    LINK_LIBRARIES libhal::util libhal::lpc40
+)
+```
 
 ### `libhal_build_demos()`
 
-Builds a set of demos.
-
-For this function to work, the directory structure must fit the following:
-
-```tree
-demos/
-├── CMakeLists.txt
-├── applications
-│   ├── adc.cpp
-│   ├── blinker.cpp
-│   ├── can.cpp
-│   ├── gpio.cpp
-│   ├── i2c.cpp
-│   ├── interrupt_pin.cpp
-│   ├── pwm.cpp
-│   ├── spi.cpp
-│   ├── ...
-│   └── uart.cpp
-└── main.cpp
-```
-
-Where main contains the startup code and calls a common function that is
-implemented across the demos in the `applications`` directory.
+Builds multiple demos at once.
 
 ```cmake
-libhal_build_demos([LIBRARY_NAME <library_name>]
-                    [INCLUDES <directories...>]
-                    [PACKAGES <packages...>]
-                    [LINK_LIBRARIES <link_libraries...>]
-                    [LINK_FLAGS <link_flags...>]
-                    DISABLE_CLANG_TIDY)
+libhal_build_demos(
+    DEMOS demo1 demo2 demo3
+    SOURCES src/common.cpp
+    INCLUDES include/
+    PACKAGES libhal-util libhal-expander
+    LINK_LIBRARIES libhal::util libhal::expander
+)
 ```
 
-- `DEMOS` names of the demos in the `application/` directory. The names must
-  corrispond to the names of the `.cpp` files in the directory. For example,
-  a demo name of `adc` must have a `adc.cpp` file in the `application/`
-  directory.
-- `INCLUDES` list of include directories. The list has no default and is
-  empty.
-- `PACKAGES` list of packages to automatically find and make available for the
-  package build.
-- `LINK_LIBRARIES` list of the libraries to link into the library.
-- `LINK_FLAGS` linker flags for the demos.
-- `DISABLE_CLANG_TIDY` option is used to disable clang-tidy checks for host
-  builds.
+Looks for `demos/demo1.cpp`, `demos/demo2.cpp`, etc.
 
-## Contributing
+## Firmware Output Functions
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for details.
+For embedded targets, these functions generate additional output files:
+
+### `libhal_create_hex_file_from(TARGET_NAME)`
+
+Creates Intel HEX file from ELF executable.
+
+```cmake
+libhal_create_hex_file_from(my_firmware)
+libhal_create_hex_file_from(my_firmware OUTPUT_DIR "${CMAKE_BINARY_DIR}/artifacts")
+```
+
+### `libhal_create_binary_file_from(TARGET_NAME)`
+
+Creates raw binary file from ELF executable.
+
+```cmake
+libhal_create_binary_file_from(my_firmware)
+```
+
+### `libhal_create_disassembly_from(TARGET_NAME)`
+
+Creates disassembly files (.S and .demangled.S).
+
+```cmake
+libhal_create_disassembly_from(my_firmware)
+```
+
+### `libhal_create_disassembly_with_source_from(TARGET_NAME)`
+
+Creates listing file with source code interleaved (.lst).
+
+```cmake
+libhal_create_disassembly_with_source_from(my_firmware)
+```
+
+### `libhal_print_size_of(TARGET_NAME)`
+
+Prints size information (text, data, bss sections).
+
+```cmake
+libhal_print_size_of(my_firmware)
+```
+
+## Clang-tidy
+
+Enable via CMake options:
+
+```bash
+# Enable clang-tidy checks
+cmake -DLIBHAL_ENABLE_CLANG_TIDY=ON ..
+
+# Enable with automatic fixes
+cmake -DLIBHAL_CLANG_TIDY_FIX=ON ..
+```
+
+## Complete Examples
+
+### Example 1: C++20 Modules Library (strong_ptr)
+
+```cmake
+cmake_minimum_required(VERSION 4.0)
+find_package(LibhalBuild REQUIRED)
+
+libhal_project_init(strong_ptr)
+
+# Create library with modules
+libhal_add_library(strong_ptr
+    MODULES modules/strong_ptr.cppm
+)
+
+# Opt-in to compile options
+target_link_libraries(strong_ptr PRIVATE libhal::compile_options)
+
+# Install
+libhal_install_library(strong_ptr NAMESPACE libhal)
+
+# Add tests
+libhal_add_tests(strong_ptr
+    TEST_NAMES enable_from_this strong_ptr mixins weak_ptr optional_ptr
+    MODULE tests/util.cppm
+)
+```
+
+### Example 2: Traditional Source Library (libhal-actuator)
+
+```cmake
+cmake_minimum_required(VERSION 3.15)
+find_package(LibhalBuild REQUIRED)
+
+libhal_project_init(libhal-actuator)
+
+# Quick library with auto-install
+libhal_quick_library(libhal-actuator
+    SOURCES
+        src/rc_servo.cpp
+        src/smart_servo/rmd/drc_v2.cpp
+        src/smart_servo/rmd/mc_x_v2.cpp
+)
+
+# Add tests
+libhal_add_tests(libhal-actuator
+    TEST_SOURCES
+        tests/main.test.cpp
+        tests/rc_servo.test.cpp
+    PACKAGES libhal-mock
+    LINK_LIBRARIES libhal::mock
+)
+```
+
+### Example 3: Demo Applications
+
+```cmake
+cmake_minimum_required(VERSION 3.15)
+find_package(LibhalBuild REQUIRED)
+
+libhal_project_init(demos)
+
+libhal_build_demos(
+    DEMOS
+        drc_v2
+        mc_x_v2
+        rc_servo
+    INCLUDES .
+    PACKAGES
+        libhal-actuator
+        libhal-expander
+    LINK_LIBRARIES
+        libhal::actuator
+        libhal::expander
+)
+```
+
+### Example 4: Full Manual Control
+
+```cmake
+cmake_minimum_required(VERSION 4.0)
+find_package(LibhalBuild REQUIRED)
+
+# Initialize project
+libhal_project_init(my_advanced_lib)
+
+# Create library manually
+add_library(my_advanced_lib STATIC)
+target_sources(my_advanced_lib PUBLIC
+    FILE_SET CXX_MODULES
+    TYPE CXX_MODULES
+    FILES modules/foo.cppm modules/bar.cppm
+    PRIVATE src/impl.cpp
+)
+
+# Opt-in to compile options
+target_link_libraries(my_advanced_lib PRIVATE
+    libhal::compile_options
+)
+
+# Custom compile definitions
+target_compile_definitions(my_advanced_lib PUBLIC MY_CUSTOM_FLAG)
+
+# Install
+libhal_install_library(my_advanced_lib NAMESPACE mycompany)
+```
+
+## Philosophy
+
+This package provides **granular building blocks with optional convenience wrappers**:
+
+- **Granular functions** - Full control for complex needs
+- **Convenience wrappers** - Sensible defaults for common patterns
+- **Opt-in compile options** - Via interface targets
+- **Explicit, not magical** - Clear what's happening
+- **Composable** - Mix and match as needed
 
 ## License
 
-Apache 2.0; see [`LICENSE`](LICENSE) for details.
+Apache-2.0
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md)

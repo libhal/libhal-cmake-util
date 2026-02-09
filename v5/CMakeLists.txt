@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 4.0)
 
 project(libhal-cmake-helpers LANGUAGES NONE)
 
@@ -21,7 +21,7 @@ include(GNUInstallDirs)
 # Install all CMake modules
 install(
     FILES
-        cmake/LibhalBuildConfig.cmake
+        cmake/LibhalCMakeUtilConfig.cmake
         cmake/LibhalCompileOptions.cmake
         cmake/LibhalLibrary.cmake
         cmake/LibhalExecutable.cmake
@@ -29,20 +29,20 @@ install(
         cmake/LibhalClangTidy.cmake
         cmake/LibhalBinUtils.cmake
     DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}/cmake/LibhalBuild
+        ${CMAKE_INSTALL_LIBDIR}/cmake/LibhalCMakeUtil
 )
 
 # Create a version file
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/LibhalBuildConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/LibhalCMakeUtilConfigVersion.cmake"
     VERSION 1.0.0
     COMPATIBILITY SameMajorVersion
 )
 
 install(
     FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/LibhalBuildConfigVersion.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/LibhalCMakeUtilConfigVersion.cmake"
     DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}/cmake/LibhalBuild
+        ${CMAKE_INSTALL_LIBDIR}/cmake/LibhalCMakeUtil
 )

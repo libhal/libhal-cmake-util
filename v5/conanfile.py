@@ -13,45 +13,38 @@
 # limitations under the License.
 
 from conan import ConanFile
-from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.files import copy
+from conan.tools.layout import basic_layout
 from pathlib import Path
 
 
-class LibhalCMakeHelpersConan(ConanFile):
+required_conan_version = ">=2.0.6"
+
+
+class LibhalCMakeUtilConan(ConanFile):
     name = "libhal-cmake-util"
     license = "Apache-2.0"
-    author = "Khalil Estell and the libhal contributors"
-    url = "https://github.com/libhal/libhal-cmake-helpers"
+    homepage = "https://github.com/libhal/libhal-cmake-util"
     description = "CMake helper functions and utilities for libhal projects"
     topics = ("cmake", "build-helpers", "libhal", "embedded")
-    settings = "os", "compiler", "build_type", "arch"
-    exports_sources = "cmake/*", "CMakeLists.txt", "LICENSE"
+    exports_sources = "cmake/*", "LICENSE"
+    no_copy_source = True
+
+    def package_id(self):
+        self.info.clear()
 
     def layout(self):
-        cmake_layout(self)
-
-    def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        basic_layout(self)
 
     def package(self):
-        cmake = CMake(self)
-        cmake.install()
-
-        # Also copy license
         copy(self, "LICENSE",
+             dst=str(Path(self.package_folder) / "licenses"),
+             src=self.source_folder)
+        copy(self, "cmake/*.cmake",
              src=self.source_folder,
              dst=self.package_folder)
 
     def package_info(self):
-        # This is a build-time only package
-        self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_file_name", "LibhalBuild")
-        BUILD_DIR = str(Path("lib") / "cmake" / "LibhalBuild")
-        self.cpp_info.builddirs = [BUILD_DIR]
-
-    def package_id(self):
-        # This is a header-only/build-tool package, no binary compatibility
-        self.info.clear()
+        # Add cmake/ directory to builddirs so find_package(LibhalCMakeUtil) works
+        cmake_dir = str(Path(self.package_folder) / "cmake")
+        self.cpp_info.builddirs = [cmake_dir]
