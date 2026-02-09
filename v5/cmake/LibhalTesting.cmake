@@ -32,25 +32,31 @@
 #       MODULES tests/util.cppm
 #       PACKAGES libhal-mock
 #   )
-function(libhal_add_tests TARGET_NAME)
-    cmake_parse_arguments(ARG
-        ""
-        "MODULES"
-        "TEST_SOURCES;TEST_NAMES;PACKAGES;LINK_LIBRARIES"
-        ${ARGN}
-    )
-
+# Public macro that enables testing in caller's scope, then delegates to internal function
+macro(libhal_add_tests TARGET_NAME)
     # Skip tests when cross-compiling
     if(CMAKE_CROSSCOMPILING)
         message(STATUS "Cross-compiling, skipping tests for ${TARGET_NAME}")
-        return()
+    else()
+        # Enable testing in caller's scope (must be in macro, not function)
+        include(CTest)
+        enable_testing()
+
+        # Delegate to internal function for proper variable scoping
+        _libhal_add_tests_impl(${TARGET_NAME} ${ARGN})
     endif()
+endmacro()
+
+# Internal function to add tests (keeps variables scoped)
+function(_libhal_add_tests_impl TARGET_NAME)
+    cmake_parse_arguments(ARG
+        ""
+        ""
+        "TEST_SOURCES;TEST_NAMES;PACKAGES;LINK_LIBRARIES;MODULES"
+        ${ARGN}
+    )
 
     message(STATUS "Adding tests for ${TARGET_NAME}")
-
-    # Enable testing
-    include(CTest)
-    enable_testing()
 
     # Find boost-ut for testing
     find_package(ut REQUIRED)
@@ -106,8 +112,9 @@ function(libhal_add_tests TARGET_NAME)
         )
 
         # Add CXX and ASAN Flags
-        target_compile_options(${TEST_TARGET} PRIVATE ${LIBHAL_CXX_FLAGS}
-                                                      ${LIBHAL_ASAN_FLAGS})
+        target_compile_options(
+            ${TEST_TARGET}
+            PRIVATE ${LIBHAL_CXX_FLAGS} ${LIBHAL_ASAN_FLAGS})
         target_link_options(${TEST_TARGET} PRIVATE ${LIBHAL_ASAN_FLAGS})
 
         # Register with CTest
