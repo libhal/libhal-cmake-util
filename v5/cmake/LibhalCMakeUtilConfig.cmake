@@ -33,8 +33,6 @@ function(libhal_project_init PROJECT_NAME)
     set(CMAKE_COLOR_DIAGNOSTICS ON PARENT_SCOPE)
     set(CMAKE_CXX_SCAN_FOR_MODULES ON PARENT_SCOPE)
 
-    project(${PROJECT_NAME} LANGUAGES CXX)
-
     # Require Ninja or Visual Studio for C++20 modules
     if(NOT CMAKE_GENERATOR MATCHES "Ninja|Visual Studio")
         message(FATAL_ERROR "C++20 modules require Ninja or Visual Studio generator")

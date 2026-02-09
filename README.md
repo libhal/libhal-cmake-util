@@ -22,6 +22,8 @@ def build_requirements(self):
 ```cmake
 cmake_minimum_required(VERSION 4.0)
 
+project(my_project LANGUAGES CXX)
+
 # Find the helpers package
 find_package(LibhalCMakeUtil REQUIRED)
 
@@ -44,7 +46,7 @@ libhal_install_library(my_library NAMESPACE libhal)
 # Add tests
 libhal_add_tests(my_library
     TEST_NAMES foo bar baz
-    MODULE tests/util.cppm
+    MODULES tests/util.cppm
 )
 ```
 
@@ -56,7 +58,6 @@ libhal_add_tests(my_library
 
 What it does:
 
-- Calls `project()` with C++ language
 - Enables compile_commands.json export
 - Checks for Ninja/Visual Studio generator (required for modules)
 - Sets up clang-tidy if enabled
@@ -80,7 +81,7 @@ libhal_apply_compile_options(my_lib)
 
 Flags included:
 
-- GCC/Clang: `-g -Werror -Wall -Wextra -Wshadow -Wpedantic -fexceptions -fno-rtti`
+- GCC/Clang: `-g -Werror -Wall -Wextra -Wshadow -pedantic -fexceptions -fno-rtti -Wno-unused-command-line-argument`
 - MSVC: `/W4 /WX /EHsc /permissive- /GR-`
 
 #### `libhal_apply_asan(TARGET_NAME)`
@@ -228,7 +229,7 @@ libhal_create_binary_file_from(my_firmware OUTPUT_DIR "${CMAKE_BINARY_DIR}/app.h
 ```
 
 Without the `OUTPUT_DIR` parameter, the file will have the same name as the
-target but with the extension `.hex`.
+target but with the extension `.bin`.
 
 ### `libhal_create_disassembly_from(TARGET_NAME)`
 
@@ -272,13 +273,17 @@ cmake -DLIBHAL_CLANG_TIDY_FIX=ON ..
 
 ```cmake
 cmake_minimum_required(VERSION 4.0)
-find_package(LibhalBuild REQUIRED)
+
+project(strong_ptr LANGUAGES CXX)
+
+find_package(LibhalCMakeUtil REQUIRED)
 
 libhal_project_init(strong_ptr)
 
 # Create library with modules
 libhal_add_library(strong_ptr
-    MODULES modules/strong_ptr.cppm
+    MODULES
+        modules/strong_ptr.cppm
 )
 
 # Opt-in to compile options
@@ -289,21 +294,31 @@ libhal_install_library(strong_ptr NAMESPACE libhal)
 
 # Add tests
 libhal_add_tests(strong_ptr
-    TEST_NAMES enable_from_this strong_ptr mixins weak_ptr optional_ptr
-    MODULE tests/util.cppm
+    TEST_NAMES
+        enable_from_this
+        strong_ptr
+        mixins
+        weak_ptr
+        optional_ptr
+
+    MODULES
+        tests/util.cppm
 )
 ```
 
 ### Example 2: Demo Applications
 
 ```cmake
-cmake_minimum_required(VERSION 3.15)
-find_package(LibhalBuild REQUIRED)
+cmake_minimum_required(VERSION 4.0)
+
+project(my_app LANGUAGES CXX)
+
+find_package(LibhalCMakeUtil REQUIRED)
 
 libhal_project_init(apps)
 
 libhal_build_apps(
-    DEMOS
+    APPS
         drc_v2
         mc_x_v2
         rc_servo
@@ -321,7 +336,10 @@ libhal_build_apps(
 
 ```cmake
 cmake_minimum_required(VERSION 4.0)
-find_package(LibhalBuild REQUIRED)
+
+project(my_advanced_lib LANGUAGES CXX)
+
+find_package(LibhalCMakeUtil REQUIRED)
 
 # Initialize project
 libhal_project_init(my_advanced_lib)
@@ -331,12 +349,14 @@ add_library(my_advanced_lib STATIC)
 target_sources(my_advanced_lib PUBLIC
     FILE_SET CXX_MODULES
     TYPE CXX_MODULES
-    FILES modules/foo.cppm modules/bar.cppm
+    FILES
+        modules/foo.cppm
+        modules/bar.cppm
     PRIVATE src/impl.cpp
 )
 
 # Opt-in to compile options
-target_link_libraries(my_advanced_lib PRIVATE LIBHAL_CXX_FLAGS)
+target_compile_options(my_advanced_lib PRIVATE ${LIBHAL_CXX_FLAGS})
 
 # Custom compile definitions
 target_compile_definitions(my_advanced_lib PUBLIC MY_CUSTOM_FLAG)
@@ -351,7 +371,7 @@ This package provides **granular building blocks with optional convenience wrapp
 
 - **Granular functions** - Full control for complex needs
 - **Convenience wrappers** - Sensible defaults for common patterns
-- **Opt-in compile options** - Via interface targets
+- **Opt-in compile options** - Via apply functions & `LIBHAL_*_FLAG` variables.
 - **Explicit, not magical** - Clear what's happening
 - **Composable** - Mix and match as needed
 
