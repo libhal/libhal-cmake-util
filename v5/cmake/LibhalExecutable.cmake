@@ -87,7 +87,7 @@ function(libhal_build_apps)
     )
 
     if(NOT ARG_APPS)
-        message(FATAL_ERROR "APPS list is required")
+        message(FATAL_ERROR "❌ APPS list is required")
     endif()
 
     # Find packages once for all apps
@@ -98,28 +98,28 @@ function(libhal_build_apps)
     message(STATUS "Building apps:")
 
     # Create each app
-    foreach(DEMO_NAME IN LISTS ARG_APPS)
-        set(DEMO_FILE "apps/${DEMO_NAME}.cpp")
+    foreach(APP_NAME IN LISTS ARG_APPS)
+        set(APP_FILE "apps/${APP_NAME}.cpp")
 
         # Check if app file exists
-        if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${DEMO_FILE}")
-            message(WARNING "Demo file not found: ${DEMO_FILE}, skipping...")
+        if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${APP_FILE}")
+            message(WARNING "‼️ App file not found: ${APP_FILE}, skipping...")
             continue()
         endif()
 
         # Build the app sources list
-        set(DEMO_SOURCES ${DEMO_FILE})
+        set(DEMO_SOURCES ${APP_FILE})
         if(ARG_SOURCES)
             list(APPEND DEMO_SOURCES ${ARG_SOURCES})
         endif()
 
         # Create the app using the granular function
-        libhal_add_executable(${DEMO_NAME}
+        libhal_add_executable(${APP_NAME}
             SOURCES ${DEMO_SOURCES}
             INCLUDES ${ARG_INCLUDES}
             LINK_LIBRARIES ${ARG_LINK_LIBRARIES}
         )
 
-        message(STATUS "  - ${DEMO_NAME}")
+        message(STATUS "  - ${APP_NAME}")
     endforeach()
 endfunction()

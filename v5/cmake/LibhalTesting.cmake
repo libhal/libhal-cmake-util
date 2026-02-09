@@ -70,7 +70,7 @@ function(_libhal_add_tests_impl TARGET_NAME)
             list(APPEND TEST_LIST "tests/${NAME}.test.cpp")
         endforeach()
     else()
-        message(FATAL_ERROR "Either TEST_SOURCES or TEST_NAMES must be provided")
+        message(FATAL_ERROR "❌ Either TEST_SOURCES or TEST_NAMES must be provided")
     endif()
 
     # Find additional packages if specified
