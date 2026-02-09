@@ -16,7 +16,7 @@ cmake_minimum_required(VERSION 3.15)
 
 # CMake helpers from libhal-cmake-helpers
 # Source: https://github.com/libhal/libhal-cmake-helpers
-find_package(LibhalBuild REQUIRED)
+find_package(LibhalCMakeUtil REQUIRED)
 
 # From libhal-cmake-helpers
 libhal_project_init(demos)

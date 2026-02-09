@@ -28,7 +28,7 @@ project(my_project LANGUAGES CXX)
 find_package(LibhalCMakeUtil REQUIRED)
 
 # Initialize your project (required)
-libhal_project_init(my_library)
+libhal_project_init()
 
 # Create a library target named `my_library` with the following source and
 # module files.
@@ -52,7 +52,7 @@ libhal_add_tests(my_library
 
 ## Core Functions
 
-### `libhal_project_init(PROJECT_NAME)`
+### `libhal_project_init()`
 
 **Required** - Sets up project-level configuration. This is the only mandatory function.
 
@@ -64,12 +64,12 @@ What it does:
 - Adds compile_commands.json copy target
 
 ```cmake
-libhal_project_init(my_project)
+libhal_project_init()
 ```
 
 ### Standard Compile Option Functions
 
-After `libhal_project_init()`, these flag attachment files become available:
+After `libhal_project_init()` these flag attachment files become available:
 
 #### `libhal_apply_compile_options(TARGET_NAME)`
 
@@ -81,8 +81,25 @@ libhal_apply_compile_options(my_lib)
 
 Flags included:
 
-- GCC/Clang: `-g -Werror -Wall -Wextra -Wshadow -pedantic -fexceptions -fno-rtti -Wno-unused-command-line-argument`
-- MSVC: `/W4 /WX /EHsc /permissive- /GR-`
+- GCC/Clang:
+
+```plaintext
+-g
+-Werror
+-Wall
+-Wextra
+-Wshadow
+-pedantic
+-fexceptions
+-fno-rtti
+-Wno-unused-command-line-argument
+```
+
+- MSVC:
+
+```plaintext
+/W4 /WX /EHsc /permissive- /GR-
+```
 
 #### `libhal_apply_asan(TARGET_NAME)`
 
@@ -278,7 +295,7 @@ project(strong_ptr LANGUAGES CXX)
 
 find_package(LibhalCMakeUtil REQUIRED)
 
-libhal_project_init(strong_ptr)
+libhal_project_init()
 
 # Create library with modules
 libhal_add_library(strong_ptr
@@ -315,7 +332,7 @@ project(my_app LANGUAGES CXX)
 
 find_package(LibhalCMakeUtil REQUIRED)
 
-libhal_project_init(apps)
+libhal_project_init()
 
 libhal_build_apps(
     APPS
@@ -342,7 +359,7 @@ project(my_advanced_lib LANGUAGES CXX)
 find_package(LibhalCMakeUtil REQUIRED)
 
 # Initialize project
-libhal_project_init(my_advanced_lib)
+libhal_project_init()
 
 # Create library manually
 add_library(my_advanced_lib STATIC)

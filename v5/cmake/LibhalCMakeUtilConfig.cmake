@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# LibhalBuild CMake Configuration
-# Main entry point for find_package(LibhalBuild)
+# LibhalCMakeUtil CMake Configuration
+# Main entry point for find_package(LibhalCMakeUtil)
 # Documentation: https://github.com/libhal/libhal-cmake-helpers
 
 # Include all helper modules
@@ -27,7 +27,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/LibhalBinUtils.cmake)
 
 # Main project initialization function
 # This is the only "required" function - handles project-level setup
-function(libhal_project_init PROJECT_NAME)
+function(libhal_project_init)
     # Standard CMake setup
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON PARENT_SCOPE)
     set(CMAKE_COLOR_DIAGNOSTICS ON PARENT_SCOPE)
@@ -51,5 +51,5 @@ function(libhal_project_init PROJECT_NAME)
     )
 endfunction()
 
-message(STATUS "LibhalBuild CMake helpers loaded!")
+message(STATUS "LibhalCMakeUtil loaded!")
 message(STATUS "  Source: https://github.com/libhal/libhal-cmake-util")
