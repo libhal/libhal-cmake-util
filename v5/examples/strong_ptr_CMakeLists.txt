@@ -22,32 +22,18 @@ find_package(LibhalBuild REQUIRED)
 # From libhal-cmake-helpers
 libhal_project_init(strong_ptr)
 
-# ==============================================================================
-# Library - Option 1: Granular approach (full control)
-# ==============================================================================
-
 # From libhal-cmake-helpers
 libhal_add_library(strong_ptr
     MODULES modules/strong_ptr.cppm
 )
 
 # Opt-in to libhal compile options
-target_link_libraries(strong_ptr PRIVATE libhal::compile_options)
+libhal_apply_compile_options(libhal-strong_ptr)
 
 # From libhal-cmake-helpers
 libhal_install_library(strong_ptr
     NAMESPACE libhal
 )
-
-# ==============================================================================
-# OR Library - Option 2: Convenience wrapper (opinionated)
-# ==============================================================================
-
-# From libhal-cmake-helpers - combines the above into one call
-# libhal_quick_library(strong_ptr
-#     MODULES modules/strong_ptr.cppm
-#     NAMESPACE libhal
-# )
 
 # ==============================================================================
 # Unit Testing

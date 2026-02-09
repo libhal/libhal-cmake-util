@@ -26,8 +26,8 @@ libhal_project_init(demos)
 # ==============================================================================
 
 # From libhal-cmake-helpers
-libhal_build_demos(
-    DEMOS
+libhal_build_apps(
+    APPLICATIONS
         drc_v2
         drc_v2_resources
         mc_x_v2
@@ -35,14 +35,14 @@ libhal_build_demos(
         mc_x_v2_resources
         rc_servo
         rc_servo16
-    
+
     INCLUDES
         .
-    
+
     PACKAGES
         libhal-actuator
         libhal-expander
-    
+
     LINK_LIBRARIES
         libhal::actuator
         libhal::expander
@@ -59,12 +59,12 @@ libhal_build_demos(
 #     PACKAGES libhal-actuator libhal-expander
 #     LINK_LIBRARIES libhal::actuator libhal::expander
 # )
-# 
+#
 # libhal_add_executable(mc_x_v2
 #     SOURCES demos/mc_x_v2.cpp
 #     INCLUDES .
 #     PACKAGES libhal-actuator libhal-expander
 #     LINK_LIBRARIES libhal::actuator libhal::expander
 # )
-# 
+#
 # # ... etc for other demos

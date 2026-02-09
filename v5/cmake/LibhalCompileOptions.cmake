@@ -13,49 +13,43 @@
 # limitations under the License.
 
 # Creates interface targets for compile options
-# Users can opt-in via: target_link_libraries(my_lib PRIVATE libhal::compile_options)
 
-function(libhal_create_interface_targets)
-    # Only create once (in case multiple projects use this)
-    if(TARGET libhal::compile_options)
-        return()
+# Define the compile flags as a variable (users can inspect/print)
+set(LIBHAL_CXX_FLAGS
+    $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:
+        -g -Werror -Wall -Wextra -Wshadow -fexceptions -fno-rtti
+        -Wno-unused-command-line-argument -pedantic>
+    $<$<CXX_COMPILER_ID:MSVC>:
+        /W4 /WX /EHsc /permissive- /GR->
+    CACHE INTERNAL "libhal standard compile flags"
+)
+
+set(LIBHAL_ASAN_FLAGS
+    $<$<AND:$<NOT:$<PLATFORM_ID:Windows>>,$<CXX_COMPILER_ID:GNU,Clang,AppleClang>>:
+        -fsanitize=address>
+    CACHE INTERNAL "libhal AddressSanitizer flags"
+)
+
+# Convenience function to apply flags without remembering variable names
+function(libhal_apply_compile_options TARGET_NAME)
+    if(NOT TARGET ${TARGET_NAME})
+        message(FATAL_ERROR "Target '${TARGET_NAME}' does not exist")
     endif()
 
-    # Standard compile options for libhal libraries
-    add_library(libhal::compile_options INTERFACE IMPORTED GLOBAL)
-    target_compile_options(libhal::compile_options INTERFACE
-        $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:
-            -g
-            -Werror
-            -Wall
-            -Wextra
-            -Wshadow
-            -Wno-unused-command-line-argument
-            -Wpedantic
-            -fexceptions
-            -fno-rtti
-        >
-        $<$<CXX_COMPILER_ID:MSVC>:
-            /W4
-            /WX
-            /EHsc
-            /permissive-
-            /GR-
-        >
-    )
+    target_compile_options(${TARGET_NAME} PRIVATE ${LIBHAL_CXX_FLAGS})
+    message(STATUS "Applied libhal compile options to ${TARGET_NAME}")
+endfunction()
 
-    # AddressSanitizer support (GCC/Clang on non-Windows only)
-    add_library(libhal::asan INTERFACE IMPORTED GLOBAL)
+function(libhal_apply_asan TARGET_NAME)
+    if(NOT TARGET ${TARGET_NAME})
+        message(FATAL_ERROR "Target '${TARGET_NAME}' does not exist")
+    endif()
+
     if(NOT WIN32)
-        target_compile_options(libhal::asan INTERFACE
-            $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-fsanitize=address>
-        )
-        target_link_options(libhal::asan INTERFACE
-            $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-fsanitize=address>
-        )
+        target_compile_options(${TARGET_NAME} PRIVATE ${LIBHAL_ASAN_FLAGS})
+        target_link_options(${TARGET_NAME} PRIVATE ${LIBHAL_ASAN_FLAGS})
+        message(STATUS "Applied AddressSanitizer to ${TARGET_NAME}")
+    else()
+        message(STATUS "AddressSanitizer not supported on Windows - skipping for ${TARGET_NAME}")
     endif()
-
-    message(STATUS "Created libhal interface targets:")
-    message(STATUS "  - libhal::compile_options (opt-in compile flags)")
-    message(STATUS "  - libhal::asan (opt-in AddressSanitizer)")
 endfunction()

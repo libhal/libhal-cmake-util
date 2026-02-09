@@ -72,6 +72,7 @@ function(libhal_add_tests TARGET_NAME)
         find_package(${PKG} REQUIRED)
     endforeach()
 
+    message(STATUS "LIBHAL: List of Tests to Build:")
     # Create test executable for each test file
     foreach(TEST_FILE IN LISTS TEST_LIST)
         # Extract test name from file path
@@ -101,10 +102,13 @@ function(libhal_add_tests TARGET_NAME)
         target_link_libraries(${TEST_TARGET} PRIVATE
             Boost::ut
             ${TARGET_NAME}
-            libhal::compile_options
-            libhal::asan
             ${ARG_LINK_LIBRARIES}
         )
+
+        # Add CXX and ASAN Flags
+        target_compile_options(${TEST_TARGET} PRIVATE ${LIBHAL_CXX_FLAGS}
+                                                      ${LIBHAL_ASAN_FLAGS})
+        target_link_options(${TEST_TARGET} PRIVATE ${LIBHAL_ASAN_FLAGS})
 
         # Register with CTest
         add_test(NAME ${TEST_TARGET} COMMAND ${TEST_TARGET})

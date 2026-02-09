@@ -1,6 +1,7 @@
 # libhal-cmake-util
 
-CMake helper functions and utilities for libhal projects. Provides both granular building blocks and convenient wrapper functions for common patterns.
+CMake helper functions and utilities for libhal projects. Provides convenient
+functions for common patterns.
 
 > [NOTE]
 > **Using v4?** The v4 API (toolchain injection style) is deprecated. See
@@ -27,19 +28,17 @@ find_package(LibhalCMakeUtil REQUIRED)
 # Initialize your project (required)
 libhal_project_init(my_library)
 
-# Option 1: Use convenience wrapper
-libhal_quick_library(my_library
-    SOURCES src/foo.cpp src/bar.cpp
-    MODULES modules/baz.cppm
-    NAMESPACE libhal
-)
-
-# Option 2: Granular control
+# Create a library target named `my_library` with the following source and
+# module files.
 libhal_add_library(my_library
     SOURCES src/foo.cpp
     MODULES modules/bar.cppm
 )
-target_link_libraries(my_library PRIVATE libhal::compile_options)
+
+# Apply standard libhal compiler options
+libhal_apply_compile_options(my_library)
+
+# Setup library installation info
 libhal_install_library(my_library NAMESPACE libhal)
 
 # Add tests
@@ -61,23 +60,22 @@ What it does:
 - Enables compile_commands.json export
 - Checks for Ninja/Visual Studio generator (required for modules)
 - Sets up clang-tidy if enabled
-- Creates `libhal::compile_options` and `libhal::asan` interface targets
 - Adds compile_commands.json copy target
 
 ```cmake
 libhal_project_init(my_project)
 ```
 
-### Interface Targets
+### Standard Compile Option Functions
 
-After `libhal_project_init()`, these targets are available:
+After `libhal_project_init()`, these flag attachment files become available:
 
-#### `libhal::compile_options`
+#### `libhal_apply_compile_options(TARGET_NAME)`
 
-Standard compile flags for libhal projects. **Opt-in** via linking:
+Standard compile flags for libhal projects.
 
 ```cmake
-target_link_libraries(my_lib PRIVATE libhal::compile_options)
+libhal_apply_compile_options(my_lib)
 ```
 
 Flags included:
@@ -85,21 +83,24 @@ Flags included:
 - GCC/Clang: `-g -Werror -Wall -Wextra -Wshadow -Wpedantic -fexceptions -fno-rtti`
 - MSVC: `/W4 /WX /EHsc /permissive- /GR-`
 
-#### `libhal::asan`
+#### `libhal_apply_asan(TARGET_NAME)`
 
 AddressSanitizer support (non-Windows only):
 
 ```cmake
-target_link_libraries(my_lib PRIVATE libhal::asan)
+libhal_apply_asan(my_lib)
 ```
+
+This API is safe to use on Windows. Executing it on a Windows machine does
+nothing.
+
+This is recommended only for unit and integration tests.
 
 ## Library Functions
 
-### Granular Functions
+### `libhal_add_library(TARGET_NAME)`
 
-#### `libhal_add_library(TARGET_NAME)`
-
-Creates a static library with optional sources and modules.
+Creates a static library target with optional sources and modules.
 
 ```cmake
 libhal_add_library(my_lib
@@ -110,10 +111,17 @@ libhal_add_library(my_lib
 
 Arguments:
 
+- 1st argument is the library name (my_lib in the above example)
 - `SOURCES` - List of .cpp files
 - `MODULES` - List of .cppm module files
 
-#### `libhal_install_library(TARGET_NAME)`
+You may use the target `my_lib` elsewhere in the code with standard CMake commands like:
+
+```cmake
+target_compiler_options(my_lib PRIVATE -Wall)
+```
+
+### `libhal_install_library(TARGET_NAME)`
 
 Configures library installation with CMake config files.
 
@@ -124,39 +132,6 @@ libhal_install_library(my_lib NAMESPACE libhal)
 Arguments:
 
 - `NAMESPACE` (optional) - Namespace for exported target (default: library name)
-
-### Convenience Functions
-
-#### `libhal_quick_library(TARGET_NAME)`
-
-One-shot library creation, configuration, and installation.
-
-```cmake
-libhal_quick_library(strong_ptr
-    MODULES modules/strong_ptr.cppm
-    NAMESPACE libhal
-)
-```
-
-Automatically applies:
-
-- `libhal::compile_options`
-- `libhal::asan` (when not cross-compiling)
-- Installs with CMake config
-
-#### `libhal_test_and_make_library()`
-
-Monolithic function combining library and tests (legacy pattern).
-
-```cmake
-libhal_test_and_make_library(
-    LIBRARY_NAME libhal-actuator
-    SOURCES src/rc_servo.cpp src/drc_v2.cpp
-    TEST_SOURCES tests/rc_servo.test.cpp tests/drc.test.cpp
-    PACKAGES libhal-mock
-    LINK_LIBRARIES libhal::mock
-)
-```
 
 ## Testing Functions
 
@@ -171,6 +146,7 @@ libhal_add_tests(my_lib
     TEST_SOURCES tests/foo.test.cpp tests/bar.test.cpp
     PACKAGES libhal-mock
     LINK_LIBRARIES libhal::mock
+    MODULES tests/util.cppm
 )
 ```
 
@@ -179,7 +155,7 @@ libhal_add_tests(my_lib
 ```cmake
 libhal_add_tests(my_lib
     TEST_NAMES foo bar baz
-    MODULE tests/util.cppm
+    MODULES tests/util.cppm
 )
 ```
 
@@ -191,7 +167,7 @@ Arguments:
 
 - `TEST_SOURCES` - Explicit list of test files
 - `TEST_NAMES` - Generate test filenames (tests/NAME.test.cpp)
-- `MODULE` - Optional utility module for tests
+- `MODULES` - Optional additional modules for tests
 - `PACKAGES` - Additional packages to find
 - `LINK_LIBRARIES` - Additional libraries to link
 
@@ -199,24 +175,24 @@ Arguments:
 
 ### `libhal_add_executable(TARGET_NAME)`
 
-Creates a single executable/demo.
+Creates a single executable/app.
 
 ```cmake
-libhal_add_executable(my_demo
-    SOURCES demos/my_demo.cpp src/common.cpp
+libhal_add_executable(my_app
+    SOURCES apps/my_app.cpp src/common.cpp
     INCLUDES include/
     PACKAGES libhal-util libhal-lpc40
     LINK_LIBRARIES libhal::util libhal::lpc40
 )
 ```
 
-### `libhal_build_demos()`
+### `libhal_build_apps()`
 
-Builds multiple demos at once.
+Builds multiple apps at once.
 
 ```cmake
-libhal_build_demos(
-    DEMOS demo1 demo2 demo3
+libhal_build_apps(
+    APPS app1 app2 app3
     SOURCES src/common.cpp
     INCLUDES include/
     PACKAGES libhal-util libhal-expander
@@ -224,7 +200,7 @@ libhal_build_demos(
 )
 ```
 
-Looks for `demos/demo1.cpp`, `demos/demo2.cpp`, etc.
+Looks for `apps/app1.cpp`, `apps/app2.cpp`, etc.
 
 ## Firmware Output Functions
 
@@ -236,8 +212,11 @@ Creates Intel HEX file from ELF executable.
 
 ```cmake
 libhal_create_hex_file_from(my_firmware)
-libhal_create_hex_file_from(my_firmware OUTPUT_DIR "${CMAKE_BINARY_DIR}/artifacts")
+libhal_create_hex_file_from(my_firmware OUTPUT_DIR "${CMAKE_BINARY_DIR}/app.hex")
 ```
+
+Without the `OUTPUT_DIR` parameter, the file will have the same name as the
+target but with the extension `.hex`.
 
 ### `libhal_create_binary_file_from(TARGET_NAME)`
 
@@ -245,7 +224,11 @@ Creates raw binary file from ELF executable.
 
 ```cmake
 libhal_create_binary_file_from(my_firmware)
+libhal_create_binary_file_from(my_firmware OUTPUT_DIR "${CMAKE_BINARY_DIR}/app.hex")
 ```
+
+Without the `OUTPUT_DIR` parameter, the file will have the same name as the
+target but with the extension `.hex`.
 
 ### `libhal_create_disassembly_from(TARGET_NAME)`
 
@@ -257,7 +240,7 @@ libhal_create_disassembly_from(my_firmware)
 
 ### `libhal_create_disassembly_with_source_from(TARGET_NAME)`
 
-Creates listing file with source code interleaved (.lst).
+Creates a disassembly file with source code interleaved (.lst).
 
 ```cmake
 libhal_create_disassembly_with_source_from(my_firmware)
@@ -299,7 +282,7 @@ libhal_add_library(strong_ptr
 )
 
 # Opt-in to compile options
-target_link_libraries(strong_ptr PRIVATE libhal::compile_options)
+libhal_apply_compile_options(strong_ptr)
 
 # Install
 libhal_install_library(strong_ptr NAMESPACE libhal)
@@ -311,41 +294,15 @@ libhal_add_tests(strong_ptr
 )
 ```
 
-### Example 2: Traditional Source Library (libhal-actuator)
+### Example 2: Demo Applications
 
 ```cmake
 cmake_minimum_required(VERSION 3.15)
 find_package(LibhalBuild REQUIRED)
 
-libhal_project_init(libhal-actuator)
+libhal_project_init(apps)
 
-# Quick library with auto-install
-libhal_quick_library(libhal-actuator
-    SOURCES
-        src/rc_servo.cpp
-        src/smart_servo/rmd/drc_v2.cpp
-        src/smart_servo/rmd/mc_x_v2.cpp
-)
-
-# Add tests
-libhal_add_tests(libhal-actuator
-    TEST_SOURCES
-        tests/main.test.cpp
-        tests/rc_servo.test.cpp
-    PACKAGES libhal-mock
-    LINK_LIBRARIES libhal::mock
-)
-```
-
-### Example 3: Demo Applications
-
-```cmake
-cmake_minimum_required(VERSION 3.15)
-find_package(LibhalBuild REQUIRED)
-
-libhal_project_init(demos)
-
-libhal_build_demos(
+libhal_build_apps(
     DEMOS
         drc_v2
         mc_x_v2
@@ -360,7 +317,7 @@ libhal_build_demos(
 )
 ```
 
-### Example 4: Full Manual Control
+### Example 3: Full Manual Control
 
 ```cmake
 cmake_minimum_required(VERSION 4.0)
@@ -379,9 +336,7 @@ target_sources(my_advanced_lib PUBLIC
 )
 
 # Opt-in to compile options
-target_link_libraries(my_advanced_lib PRIVATE
-    libhal::compile_options
-)
+target_link_libraries(my_advanced_lib PRIVATE LIBHAL_CXX_FLAGS)
 
 # Custom compile definitions
 target_compile_definitions(my_advanced_lib PUBLIC MY_CUSTOM_FLAG)

@@ -43,9 +43,6 @@ function(libhal_project_init PROJECT_NAME)
     # Set up clang-tidy if enabled
     libhal_setup_clang_tidy()
 
-    # Create the interface targets for compile options
-    libhal_create_interface_targets()
-
     # Add compile_commands.json copy target
     add_custom_target(copy_compile_commands ALL
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
