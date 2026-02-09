@@ -16,7 +16,7 @@ cmake_minimum_required(VERSION 4.0)
 
 # CMake helpers from libhal-cmake-helpers
 # Source: https://github.com/libhal/libhal-cmake-helpers
-find_package(LibhalBuild REQUIRED)
+find_package(LibhalCMakeUtil REQUIRED)
 
 # Initialize project (handles clang-tidy, compile flags setup, etc.)
 # From libhal-cmake-helpers
