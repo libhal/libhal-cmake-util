@@ -110,7 +110,7 @@ function(libhal_unit_test)
   # (Windows ASAN requires runtime DLL setup)
   if(ADDRESS_SANITIZER_SUPPORT AND NOT WIN32)
     message(STATUS
-    "${LIBHAL_TITLE} Address Sanitizer available! Using it for tests!")
+    "${LIBHAL_TITLE} Address Sanitizer available! Using it for tests! WIN32 '${WIN32}'")
     target_compile_options(unit_test PRIVATE -fsanitize=address)
     target_link_options(unit_test PRIVATE -fsanitize=address)
   else()
