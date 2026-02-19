@@ -56,8 +56,8 @@ function(libhal_add_executable TARGET_NAME)
         target_link_libraries(${TARGET_NAME} PRIVATE ${ARG_LINK_LIBRARIES})
     endif()
 
-    # Apply compile options
-    target_link_libraries(${TARGET_NAME} PRIVATE ${LIBHAL_CXX_FLAGS})
+    target_compile_options(${TARGET_NAME} PRIVATE ${LIBHAL_CXX_FLAGS})
+    target_link_options(${TARGET_NAME} PRIVATE ${LIBHAL_CXX_FLAGS})
 
     # Set C++ standard
     target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
