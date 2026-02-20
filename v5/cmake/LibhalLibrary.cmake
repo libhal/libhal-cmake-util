@@ -78,6 +78,7 @@ function(libhal_install_library TARGET_NAME)
         NAMESPACE ${ARG_NAMESPACE}::
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_NAME}"
         CXX_MODULES_DIRECTORY "cxx-modules"
+        EXPORT_PACKAGE_DEPENDENCIES
     )
 
     message(STATUS "🎯 Configured install for: ${TARGET_NAME} (namespace: ${ARG_NAMESPACE}::)")
