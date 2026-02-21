@@ -62,6 +62,17 @@ What it does:
 - Checks for Ninja/Visual Studio generator (required for modules)
 - Sets up clang-tidy if enabled
 - Adds compile_commands.json copy target
+- Globally injects `-Qunused-arguments` into `CMAKE_CXX_FLAGS` for Clang/AppleClang
+
+> [!NOTE]
+>
+> `-Qunused-arguments` is appended to `CMAKE_CXX_FLAGS` (not
+> `add_compile_options`) so it is visible to CMake's C++20 module dependency
+> scanning commands for imported targets. During scanning, `clang-scan-deps`
+> passes both `--precompile` and `-c` to the compiler, making `-c` unused and
+> producing noisy `clang++: warning: argument unused during compilation: '-c'`
+> diagnostics. `-Qunused-arguments` suppresses this at the Clang driver level,
+> where `-Wno-unused-command-line-argument` does not.
 
 ```cmake
 libhal_project_init()
