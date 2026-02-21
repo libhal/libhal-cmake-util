@@ -38,6 +38,17 @@ function(libhal_project_init)
         message(FATAL_ERROR "C++20 modules require Ninja or Visual Studio generator")
     endif()
 
+    # Suppress clang's "argument unused during compilation: '-c'" warning that
+    # fires during CMake's C++20 module dependency scanning phase.
+    # clang-scan-deps passes both --precompile and -c to the compiler, making
+    # -c unused. Using -Qunused-arguments via CMAKE_CXX_FLAGS (not
+    # add_compile_options) ensures the flag is visible to module scanning
+    # commands for imported targets.
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang")
+        string(APPEND CMAKE_CXX_FLAGS " -Qunused-arguments")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" PARENT_SCOPE)
+    endif()
+
     # Set up clang-tidy if enabled
     libhal_setup_clang_tidy()
 
