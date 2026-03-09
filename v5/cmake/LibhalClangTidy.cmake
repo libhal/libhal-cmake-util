@@ -22,7 +22,7 @@ option(LIBHAL_CLANG_TIDY_FIX "Apply clang-tidy fixes automatically. If enabled, 
 # Called by libhal_project_init()
 function(libhal_setup_clang_tidy)
     if(CMAKE_CROSSCOMPILING)
-        message(STATUS "🔄 Cross-compiling, skipping clang-tidy")
+        message(STATUS "⏭️ Cross-compiling, skipping clang-tidy")
         return()
     endif()
 

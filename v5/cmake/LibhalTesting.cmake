@@ -36,7 +36,7 @@
 macro(libhal_add_tests TARGET_NAME)
     # Skip tests when cross-compiling
     if(CMAKE_CROSSCOMPILING)
-        message(STATUS "Cross-compiling, skipping tests for ${TARGET_NAME}")
+        message(STATUS "⏭️ Cross-compiling, skipping tests for ${TARGET_NAME}")
     else()
         # Enable testing in caller's scope (must be in macro, not function)
         include(CTest)
