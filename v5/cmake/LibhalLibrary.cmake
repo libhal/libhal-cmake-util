@@ -42,8 +42,9 @@ function(libhal_add_library TARGET_NAME)
         )
     endif()
 
-    # Set C++23 standard for modules support
-    target_compile_features(${TARGET_NAME} PUBLIC cxx_std_23)
+    # Attach C++ standard to package
+    target_compile_features(${TARGET_NAME} PUBLIC
+        "cxx_std_${CMAKE_CXX_STANDARD}")
 
     message(STATUS "📦 Created library: ${TARGET_NAME}")
 endfunction()
