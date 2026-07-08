@@ -1,5 +1,7 @@
 # libhal-cmake-util
 
+![libhal-cmake-util release version](https://img.shields.io/github/v/release/libhal/libhal-cmake-util)
+
 CMake helper functions and utilities for libhal projects. Provides convenient
 functions for common patterns.
 
