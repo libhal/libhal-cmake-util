@@ -58,6 +58,17 @@ function(_libhal_add_tests_impl TARGET_NAME)
 
     message(STATUS "Adding tests for ${TARGET_NAME}")
 
+    option(LIBHAL_GENERATE_DSYM
+        "On macOS, run dsymutil on each test executable after linking to \
+generate a .dSYM debug info bundle" ON)
+
+    if(APPLE AND LIBHAL_GENERATE_DSYM)
+        find_program(DSYMUTIL_EXECUTABLE dsymutil)
+        if(NOT DSYMUTIL_EXECUTABLE)
+            message(STATUS "dsymutil not found, skipping dSYM generation")
+        endif()
+    endif()
+
     # Find boost-ut for testing
     find_package(ut REQUIRED)
 
@@ -119,6 +130,14 @@ function(_libhal_add_tests_impl TARGET_NAME)
 
         # Register with CTest
         add_test(NAME ${TEST_TARGET} COMMAND ${TEST_TARGET})
+
+        if(APPLE AND LIBHAL_GENERATE_DSYM AND DSYMUTIL_EXECUTABLE)
+            add_custom_command(TARGET ${TEST_TARGET} POST_BUILD
+                COMMAND ${DSYMUTIL_EXECUTABLE} $<TARGET_FILE:${TEST_TARGET}>
+                COMMENT "Generating dSYM for ${TEST_TARGET}"
+                VERBATIM
+            )
+        endif()
 
         message(STATUS "  - ${TEST_TARGET}")
     endforeach()
