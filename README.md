@@ -62,7 +62,7 @@ What it does:
 
 - Enables compile_commands.json export
 - Checks for Ninja/Visual Studio generator (required for modules)
-- Sets up clang-tidy if enabled
+- Sets up clang-tidy (enabled by default, see [Clang-tidy](#clang-tidy))
 - Adds compile_commands.json copy target
 - Globally injects `-Qunused-arguments` into `CMAKE_CXX_FLAGS` for Clang/AppleClang
 
@@ -287,14 +287,24 @@ libhal_print_size_of(my_firmware)
 
 ## Clang-tidy
 
-Enable via CMake options:
+Clang-tidy checks are **enabled by default** (skipped automatically when
+cross-compiling, or when `clang-tidy` isn't found on `PATH`). Control it via
+CMake options:
 
 ```bash
-# Enable clang-tidy checks
-cmake -DLIBHAL_ENABLE_CLANG_TIDY=ON ..
+# Disable clang-tidy checks
+cmake -DLIBHAL_ENABLE_CLANG_TIDY=OFF ..
 
 # Enable with automatic fixes
 cmake -DLIBHAL_CLANG_TIDY_FIX=ON ..
+```
+
+Or at the start of your `CMakeList.txt` file:
+
+```cmake
+cmake_minimum_required(VERSION 4.0)
+
+set(LIBHAL_ENABLE_CLANG_TIDY OFF)
 ```
 
 ## Complete Examples

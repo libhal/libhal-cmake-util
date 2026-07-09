@@ -15,7 +15,7 @@
 # Clang-tidy integration for libhal projects
 
 # Options for controlling clang-tidy
-option(LIBHAL_ENABLE_CLANG_TIDY "Enable clang-tidy checks" OFF)
+option(LIBHAL_ENABLE_CLANG_TIDY "Enable clang-tidy checks" ON)
 option(LIBHAL_CLANG_TIDY_FIX "Apply clang-tidy fixes automatically. If enabled, automatically enables clang-tidy." OFF)
 
 # Internal function to set up clang-tidy
@@ -27,7 +27,9 @@ function(libhal_setup_clang_tidy)
     endif()
 
     if(NOT LIBHAL_ENABLE_CLANG_TIDY AND NOT LIBHAL_CLANG_TIDY_FIX)
-        message(STATUS "⚠️ Clang-tidy disabled. Use -DLIBHAL_ENABLE_CLANG_TIDY=ON to enable) or try -o '*:enable_clang_tidy=True' on conan packages with that option")
+        message(STATUS "⚠️ Clang-tidy disabled")
+        message(STATUS "   To enable, pass -DLIBHAL_ENABLE_CLANG_TIDY=ON to your cmake command")
+        message(STATUS "   or add set(LIBHAL_ENABLE_CLANG_TIDY ON) to your CMakeLists.txt")
         return()
     endif()
 
@@ -51,11 +53,13 @@ function(libhal_setup_clang_tidy)
     # Add --fix if requested
     if(LIBHAL_CLANG_TIDY_FIX)
         list(APPEND CLANG_TIDY_CMD "--fix")
-        message(STATUS "🛠️ Clang-tidy will apply fixes automatically")
+        message(STATUS "🛠️ Clang-tidy fix ENABLED. Will apply fixes automatically...")
     endif()
 
     # Set the CMake variable to enable clang-tidy for all targets
     set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_CMD} CACHE STRING "clang-tidy command" FORCE)
 
     message(STATUS "✅ Clang-tidy enabled!")
+    message(STATUS "   To disable, pass -DLIBHAL_ENABLE_CLANG_TIDY=OFF to your cmake command")
+    message(STATUS "   or add set(LIBHAL_ENABLE_CLANG_TIDY OFF) to your CMakeLists.txt")
 endfunction()
