@@ -58,6 +58,31 @@ function(_libhal_add_tests_impl TARGET_NAME)
 
     message(STATUS "Adding tests for ${TARGET_NAME}")
 
+    # Detect macOS 26 + LLVM/Clang 20, a combination where AddressSanitizer's
+    # runtime initialization is known to deadlock (spins forever in
+    # __asan::AsanInitFromRtl / StaticSpinMutex::LockSlow before main() is
+    # ever reached, both under a debugger and standalone).
+    if(APPLE AND NOT DEFINED CACHE{LIBHAL_ASAN_MACOS26_CLANG20_CHECKED})
+        set(LIBHAL_ASAN_MACOS26_CLANG20_CHECKED TRUE CACHE INTERNAL "")
+        execute_process(
+            COMMAND sw_vers -productVersion
+            OUTPUT_VARIABLE LIBHAL_MACOS_VERSION
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        if(LIBHAL_MACOS_VERSION MATCHES "^26" AND
+           CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND
+           CMAKE_CXX_COMPILER_VERSION MATCHES "^20")
+            set(LIBHAL_DISABLE_ASAN TRUE CACHE INTERNAL "")
+            message(WARNING
+                "⚠️  Detected macOS ${LIBHAL_MACOS_VERSION} with LLVM/Clang "
+                "${CMAKE_CXX_COMPILER_VERSION}: AddressSanitizer is known to "
+                "deadlock during runtime initialization on this combination. "
+                "Disabling ASan for test targets.")
+        else()
+            set(LIBHAL_DISABLE_ASAN FALSE CACHE INTERNAL "")
+        endif()
+    endif()
+
     option(LIBHAL_GENERATE_DSYM
         "On macOS, run dsymutil on each test executable after linking to \
 generate a .dSYM debug info bundle" ON)
@@ -122,10 +147,11 @@ generate a .dSYM debug info bundle" ON)
         )
 
         # Add CXX and ASAN Flags
-        target_compile_options(
-            ${TEST_TARGET}
-            PRIVATE ${LIBHAL_CXX_FLAGS} ${LIBHAL_ASAN_FLAGS})
-        target_link_options(${TEST_TARGET} PRIVATE ${LIBHAL_ASAN_FLAGS})
+        target_compile_options(${TEST_TARGET} PRIVATE ${LIBHAL_CXX_FLAGS})
+        if(NOT LIBHAL_DISABLE_ASAN)
+            target_compile_options(${TEST_TARGET} PRIVATE ${LIBHAL_ASAN_FLAGS})
+            target_link_options(${TEST_TARGET} PRIVATE ${LIBHAL_ASAN_FLAGS})
+        endif()
 
         # Register with CTest
         add_test(NAME ${TEST_TARGET} COMMAND ${TEST_TARGET})
