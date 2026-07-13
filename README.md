@@ -163,6 +163,20 @@ libhal_install_library(my_lib NAMESPACE libhal)
 Arguments:
 
 - `NAMESPACE` (optional) - Namespace for exported target (default: library name)
+- `PACKAGE_NAME` (optional) - Name used for `find_package()` and the installed
+  config file/directory (default: library name). Useful when the
+  `find_package()` name should differ from the linked target name, e.g. a
+  library target named `util` that should be discoverable as
+  `find_package(libhal-util)` while still linking as `libhal::util`:
+
+```cmake
+libhal_install_library(util NAMESPACE libhal PACKAGE_NAME libhal-util)
+```
+
+```cmake
+find_package(libhal-util REQUIRED CONFIG)
+target_link_libraries(my_app PRIVATE libhal::util)
+```
 
 ## Testing Functions
 

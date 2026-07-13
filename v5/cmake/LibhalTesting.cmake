@@ -74,9 +74,7 @@ generate a .dSYM debug info bundle" ON)
 
     # Determine test list
     set(TEST_LIST)
-    if(ARG_TEST_SOURCES)
-        set(TEST_LIST ${ARG_TEST_SOURCES})
-    elseif(ARG_TEST_NAMES)
+    if(ARG_TEST_NAMES)
         foreach(NAME IN LISTS ARG_TEST_NAMES)
             list(APPEND TEST_LIST "tests/${NAME}.test.cpp")
         endforeach()
@@ -106,10 +104,11 @@ generate a .dSYM debug info bundle" ON)
                 FILE_SET CXX_MODULES
                 TYPE CXX_MODULES
                 FILES ${ARG_MODULES}
-                PRIVATE ${TEST_FILE}
+                PRIVATE ${TEST_FILE} ${ARG_TEST_SOURCES}
             )
         else()
-            target_sources(${TEST_TARGET} PRIVATE ${TEST_FILE})
+            target_sources(${TEST_TARGET} PRIVATE
+                ${TEST_FILE} ${ARG_TEST_SOURCES})
         endif()
 
         # Configure test
