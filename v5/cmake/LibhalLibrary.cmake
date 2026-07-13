@@ -54,12 +54,20 @@ endfunction()
 # Usage:
 #   libhal_install_library(my_lib NAMESPACE libhal)
 #   libhal_install_library(my_lib)  # Uses library name as namespace
+#   libhal_install_library(my_lib NAMESPACE libhal PACKAGE_NAME libhal-my-lib)
+#       # find_package(libhal-my-lib) resolves this package, while the linked
+#       # target remains libhal::my_lib
 function(libhal_install_library TARGET_NAME)
-    cmake_parse_arguments(ARG "" "NAMESPACE" "" ${ARGN})
+    cmake_parse_arguments(ARG "" "NAMESPACE;PACKAGE_NAME" "" ${ARGN})
 
     # Default namespace is the target name
     if(NOT ARG_NAMESPACE)
         set(ARG_NAMESPACE ${TARGET_NAME})
+    endif()
+
+    # Default package name (used for find_package()) is the target name
+    if(NOT ARG_PACKAGE_NAME)
+        set(ARG_PACKAGE_NAME ${TARGET_NAME})
     endif()
 
     # Install the library and its module files
@@ -75,12 +83,12 @@ function(libhal_install_library TARGET_NAME)
     # Install the CMake config files
     install(
         EXPORT ${TARGET_NAME}_targets
-        FILE "${TARGET_NAME}-config.cmake"
+        FILE "${ARG_PACKAGE_NAME}-config.cmake"
         NAMESPACE ${ARG_NAMESPACE}::
-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_NAME}"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${ARG_PACKAGE_NAME}"
         CXX_MODULES_DIRECTORY "cxx-modules"
         EXPORT_PACKAGE_DEPENDENCIES
     )
 
-    message(STATUS "🎯 Configured install for: ${TARGET_NAME} (namespace: ${ARG_NAMESPACE}::)")
+    message(STATUS "🎯 Configured install for: ${TARGET_NAME} (namespace: ${ARG_NAMESPACE}::, find_package: ${ARG_PACKAGE_NAME})")
 endfunction()
