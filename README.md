@@ -127,6 +127,27 @@ nothing.
 
 This is recommended only for unit and integration tests.
 
+#### `libhal_apply_icf(TARGET_NAME)`
+
+Linker identical code folding for an executable target:
+
+```cmake
+libhal_apply_icf(my_app)
+```
+
+Folds functions that compile to identical machine code (a common result of
+template instantiation over structurally equivalent types, such as many
+libhal-org futures/tasks differing only in a pointer-sized template
+parameter) into a single copy in the final binary. Uses `--icf=safe` rather
+than `--icf=all`: `safe` only folds functions the linker can prove are
+interchangeable under all observable program behavior (including that
+nothing compares their addresses for identity), so it carries no correctness
+risk.
+
+This is an LLD-only flag and is gated to Clang/AppleClang, since this org's
+Clang toolchain is the one paired with LLD. It is safe to call on any
+toolchain; on a non-Clang compiler it applies no flags.
+
 ## Library Functions
 
 ### `libhal_add_library(TARGET_NAME)`
