@@ -320,6 +320,13 @@ Prints size information (text, data, bss sections).
 libhal_print_size_of(my_firmware)
 ```
 
+## Utility Functions
+
+### `libhal_copy_compile_commands`
+
+Copies the `compile_commands.json` file to the root of your source directory.
+This is useful to make it easier for the `clangd` LSP to find the file.
+
 ## Clang-tidy
 
 Clang-tidy checks are **enabled by default** (skipped automatically when

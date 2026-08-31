@@ -28,14 +28,19 @@ include(${CMAKE_CURRENT_LIST_DIR}/LibhalBinUtils.cmake)
 # Main project initialization function
 # This is the only "required" function - handles project-level setup
 function(libhal_project_init)
+    cmake_parse_arguments(LIBHAL_INIT "DISABLE_MODULES" "" "" ${ARGN})
+
     # Standard CMake setup
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON PARENT_SCOPE)
     set(CMAKE_COLOR_DIAGNOSTICS ON PARENT_SCOPE)
-    set(CMAKE_CXX_SCAN_FOR_MODULES ON PARENT_SCOPE)
 
-    # Require Ninja or Visual Studio for C++20 modules
-    if(NOT CMAKE_GENERATOR MATCHES "Ninja|Visual Studio")
-        message(FATAL_ERROR "C++20 modules require Ninja or Visual Studio generator")
+    if(NOT LIBHAL_INIT_DISABLE_MODULES)
+        set(CMAKE_CXX_SCAN_FOR_MODULES ON PARENT_SCOPE)
+
+        # Require Ninja or Visual Studio for C++20 modules
+        if(NOT CMAKE_GENERATOR MATCHES "Ninja|Visual Studio")
+            message(FATAL_ERROR "C++20 modules require Ninja or Visual Studio generator")
+        endif()
     endif()
 
     # Suppress clang's "argument unused during compilation: '-c'" warning that
@@ -52,7 +57,9 @@ function(libhal_project_init)
     # Set up clang-tidy if enabled
     libhal_setup_clang_tidy()
 
-    # Add compile_commands.json copy target
+endfunction()
+
+function(libhal_copy_compile_commands)
     add_custom_target(copy_compile_commands ALL
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_BINARY_DIR}/compile_commands.json
