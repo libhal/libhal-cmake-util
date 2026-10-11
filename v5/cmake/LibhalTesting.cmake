@@ -158,6 +158,12 @@ generate a .dSYM debug info bundle" ON)
         add_test(NAME ${TEST_TARGET} COMMAND ${TEST_TARGET})
 
         if(APPLE AND LIBHAL_GENERATE_DSYM AND DSYMUTIL_EXECUTABLE)
+            # dsymutil reads debug info from the linker's merged LTO object.
+            # Give each test its own path; Apple's ld writes a fixed lto.o
+            # into a shared -object_path_lto directory, so parallel links
+            # overwrite each other's object and dsymutil can't find symbols.
+            target_link_options(${TEST_TARGET} PRIVATE
+                "LINKER:-object_path_lto,${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TEST_TARGET}.dir/lto.o")
             add_custom_command(TARGET ${TEST_TARGET} POST_BUILD
                 COMMAND ${DSYMUTIL_EXECUTABLE} $<TARGET_FILE:${TEST_TARGET}>
                 COMMENT "Generating dSYM for ${TEST_TARGET}"
