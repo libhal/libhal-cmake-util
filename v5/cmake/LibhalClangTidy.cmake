@@ -42,13 +42,24 @@ function(libhal_setup_clang_tidy)
 
     message(STATUS "✅ Clang-tidy found: ${CLANG_TIDY_EXE}")
 
-    # Build the clang-tidy command
-    set(CLANG_TIDY_CMD "${CLANG_TIDY_EXE}")
+    # Search upward for .clang-tidy, the same way clang-tidy does. Without a
+    # config, clang-tidy 23+ enables no checks and fails with "no checks
+    # enabled". This happens for packages built from the Conan cache that
+    # don't export their .clang-tidy.
+    set(CLANG_TIDY_SEARCH_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+    while(NOT EXISTS "${CLANG_TIDY_SEARCH_DIR}/.clang-tidy")
+        get_filename_component(CLANG_TIDY_PARENT_DIR
+            "${CLANG_TIDY_SEARCH_DIR}" DIRECTORY)
+        if(CLANG_TIDY_PARENT_DIR STREQUAL CLANG_TIDY_SEARCH_DIR)
+            message(STATUS "⚠️ No .clang-tidy found, skipping clang-tidy")
+            return()
+        endif()
+        set(CLANG_TIDY_SEARCH_DIR "${CLANG_TIDY_PARENT_DIR}")
+    endwhile()
 
-    # Look for .clang-tidy file
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.clang-tidy")
-        list(APPEND CLANG_TIDY_CMD "--config-file=${CMAKE_CURRENT_SOURCE_DIR}/.clang-tidy")
-    endif()
+    # Build the clang-tidy command
+    set(CLANG_TIDY_CMD "${CLANG_TIDY_EXE}"
+        "--config-file=${CLANG_TIDY_SEARCH_DIR}/.clang-tidy")
 
     # Add --fix if requested
     if(LIBHAL_CLANG_TIDY_FIX)
