@@ -58,7 +58,7 @@ function(_libhal_add_tests_impl TARGET_NAME)
 
     message(STATUS "Adding tests for ${TARGET_NAME}")
 
-    # Detect macOS 26 + LLVM/Clang 20, a combination where AddressSanitizer's
+    # Detect upstream LLVM/Clang 20 on macOS 26+, where AddressSanitizer's
     # runtime initialization is known to deadlock (spins forever in
     # __asan::AsanInitFromRtl / StaticSpinMutex::LockSlow before main() is
     # ever reached, both under a debugger and standalone).
@@ -69,9 +69,10 @@ function(_libhal_add_tests_impl TARGET_NAME)
             OUTPUT_VARIABLE LIBHAL_MACOS_VERSION
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
-        if(LIBHAL_MACOS_VERSION MATCHES "^26" AND
-           CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND
-           CMAKE_CXX_COMPILER_VERSION MATCHES "^20")
+        if(LIBHAL_MACOS_VERSION VERSION_GREATER_EQUAL "26" AND
+           CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
+           CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "20" AND
+           CMAKE_CXX_COMPILER_VERSION VERSION_LESS "21")
             set(LIBHAL_DISABLE_ASAN TRUE CACHE INTERNAL "")
             message(WARNING
                 "⚠️  Detected macOS ${LIBHAL_MACOS_VERSION} with LLVM/Clang "
