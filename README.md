@@ -237,6 +237,56 @@ Arguments:
 - `PACKAGES` - Additional packages to find
 - `LINK_LIBRARIES` - Additional libraries to link
 
+### `libhal_add_compile_checks(TARGET_NAME)`
+
+Checks code that must fail to compile: misuse rejected by the type system,
+and dangling references reported by Clang's lifetime safety analysis.
+
+```cmake
+libhal_add_compile_checks(my_library
+    FILES
+        tests/compile_checks/lifetime_rejects.cpp
+        tests/compile_checks/lifetime_analysis.cpp
+)
+```
+
+Each file marks the diagnostics it must produce, using Clang's `-verify`
+syntax. `@+1` points at the next line, which keeps each expectation on its own
+line where clang-format won't move it:
+
+```cpp
+import my_library;
+
+sensor return_sensor_local()
+{
+  fake_i2c bus{ 1 };
+  // expected-error@+1 {{is returned}}
+  return sensor(bus);
+}
+```
+
+The files are compiled as part of the normal build, with `LIBHAL_CXX_FLAGS`
+(warnings are errors, so lifetime findings are written as `expected-error`).
+The build fails if an expected diagnostic is missing or an unexpected one
+appears, so a known gap that starts being caught shows up too. Notes are not
+checked.
+
+- Clang skips its lifetime analysis once a file has a hard error. Keep
+  type-system rejections (deleted functions, `consteval`) and lifetime
+  analysis findings in separate files.
+- A file that expects no diagnostics must contain
+  `// expected-no-diagnostics`.
+- A passing check is rebuilt only when the file, a header it includes or an
+  imported module changes.
+
+Needs Clang 23+. With any other compiler, the function only prints a status
+message.
+
+Arguments:
+
+- `FILES` (required): files to check
+- `LINK_LIBRARIES` (optional): libraries to link besides `TARGET_NAME`
+
 ## Executable/Demo Functions
 
 ### `libhal_add_executable(TARGET_NAME)`

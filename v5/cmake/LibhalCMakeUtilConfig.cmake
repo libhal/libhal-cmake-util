@@ -22,6 +22,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/LibhalClangTidy.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/LibhalLibrary.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/LibhalExecutable.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/LibhalTesting.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/LibhalCompileChecks.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/LibhalTerminalColor.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/LibhalBinUtils.cmake)
 
