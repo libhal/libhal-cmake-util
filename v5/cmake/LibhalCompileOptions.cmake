@@ -21,6 +21,11 @@ set(LIBHAL_CXX_FLAGS
         -Wno-unused-command-line-argument -pedantic>
     $<$<CXX_COMPILER_ID:MSVC>:
         /W4 /WX /EHsc /permissive- /GR->
+    # Clang 23's lifetime safety analysis checks the [[clang::lifetimebound]],
+    # [[gsl::Owner]] and [[gsl::Pointer]] annotations that libhal uses to catch
+    # dangling references at compile time.
+    $<$<AND:$<CXX_COMPILER_ID:Clang>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,23>>:
+        -Wlifetime-safety>
     CACHE INTERNAL "libhal standard compile flags"
 )
 
