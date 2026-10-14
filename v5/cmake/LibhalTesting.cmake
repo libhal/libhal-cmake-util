@@ -63,11 +63,6 @@ function(_libhal_add_tests_impl TARGET_NAME)
     # - Upstream LLVM/Clang 20 on macOS 26+: the ASan runtime deadlocks during
     #   initialization (spins forever in __asan::AsanInitFromRtl /
     #   StaticSpinMutex::LockSlow before main() is ever reached).
-    # - Upstream LLVM/Clang 22+ on macOS 14/15: llvm-toolchain links programs
-    #   against its bundled libc++ there, but the ASan runtime is linked
-    #   against the system libc++. Both end up in one process, objects from
-    #   one are freed by the other, and ASan aborts (e.g. "attempting free on
-    #   address which was not malloc()-ed" in std::locale::~locale at exit).
     if(APPLE AND NOT DEFINED CACHE{LIBHAL_ASAN_MACOS_CHECKED})
         set(LIBHAL_ASAN_MACOS_CHECKED TRUE CACHE INTERNAL "")
         execute_process(
@@ -83,12 +78,6 @@ function(_libhal_add_tests_impl TARGET_NAME)
                 set(LIBHAL_ASAN_DISABLE_REASON
                     "AddressSanitizer is known to deadlock during runtime "
                     "initialization on this combination.")
-            elseif(LIBHAL_MACOS_VERSION VERSION_GREATER_EQUAL "14" AND
-                   LIBHAL_MACOS_VERSION VERSION_LESS "26" AND
-                   CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "22")
-                set(LIBHAL_ASAN_DISABLE_REASON
-                    "the toolchain's bundled libc++ conflicts with the "
-                    "system libc++ that the ASan runtime links against.")
             endif()
         endif()
         if(DEFINED LIBHAL_ASAN_DISABLE_REASON)
