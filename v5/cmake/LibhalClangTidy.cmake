@@ -61,6 +61,39 @@ function(libhal_setup_clang_tidy)
     set(CLANG_TIDY_CMD "${CLANG_TIDY_EXE}"
         "--config-file=${CLANG_TIDY_SEARCH_DIR}/.clang-tidy")
 
+    # A file that does `import std` hands clang-tidy the declarations of the
+    # standard library module, and CMake compiles its sources (libc++'s
+    # share/libc++/v1) as ordinary includes, not system headers. With libhal's
+    # HeaderFilterRegex of ".*", clang-tidy then reports libc++'s own code,
+    # such as `_Exit` (bugprone-reserved-identifier). Exclude the directories
+    # of the modules CMake builds from the toolchain's modules.json.
+    if(CMAKE_CXX_STDLIB_MODULES_JSON AND EXISTS "${CMAKE_CXX_STDLIB_MODULES_JSON}")
+        file(READ "${CMAKE_CXX_STDLIB_MODULES_JSON}" STD_MODULES_JSON)
+        cmake_path(GET CMAKE_CXX_STDLIB_MODULES_JSON PARENT_PATH STD_MODULES_JSON_DIR)
+        string(JSON STD_MODULE_COUNT LENGTH "${STD_MODULES_JSON}" modules)
+        set(STD_MODULE_DIRS "")
+        if(STD_MODULE_COUNT GREATER 0)
+            math(EXPR STD_MODULE_LAST "${STD_MODULE_COUNT} - 1")
+            foreach(STD_MODULE_INDEX RANGE ${STD_MODULE_LAST})
+                string(JSON STD_MODULE_SOURCE GET "${STD_MODULES_JSON}"
+                    modules ${STD_MODULE_INDEX} source-path)
+                cmake_path(ABSOLUTE_PATH STD_MODULE_SOURCE
+                    BASE_DIRECTORY "${STD_MODULES_JSON_DIR}" NORMALIZE)
+                cmake_path(GET STD_MODULE_SOURCE PARENT_PATH STD_MODULE_DIR)
+                # Escape regex characters, such as the "+" in "libc++"
+                string(REGEX REPLACE "([][+.*?()^$|\\{}])" "\\\\\\1"
+                    STD_MODULE_DIR "${STD_MODULE_DIR}")
+                list(APPEND STD_MODULE_DIRS "${STD_MODULE_DIR}")
+            endforeach()
+        endif()
+        list(REMOVE_DUPLICATES STD_MODULE_DIRS)
+        if(STD_MODULE_DIRS)
+            list(JOIN STD_MODULE_DIRS "|" STD_MODULE_DIRS_REGEX)
+            list(APPEND CLANG_TIDY_CMD
+                "--exclude-header-filter=^(${STD_MODULE_DIRS_REGEX})/")
+        endif()
+    endif()
+
     # Add --fix if requested
     if(LIBHAL_CLANG_TIDY_FIX)
         list(APPEND CLANG_TIDY_CMD "--fix")
